@@ -45,4 +45,12 @@ export const documentAPI = {
   delete: (id) => api.delete(`/documents/${id}/`),
 };
 
+export const userAPI = {
+  list: (params) => api.get('/users/', { params }),
+  create: (data) => api.post('/users/', data),
+  delete: (id) => api.delete(`/users/${id}/`),
+  toggleActive: (id) => api.post(`/users/${id}/toggle_active/`),
+  resetPassword: (id, password) => api.post(`/users/${id}/reset_password/`, { password }),
+};
+
 export default api;

@@ -8,6 +8,7 @@ import ArchiveListPage from './pages/ArchiveListPage';
 import UploadPage from './pages/UploadPage';
 import DocumentDetailPage from './pages/DocumentDetailPage';
 import BranchesPage from './pages/BranchesPage';
+import UsersPage from './pages/UsersPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/upload" element={<UploadPage />} />
             <Route path="/archive/:id" element={<DocumentDetailPage />} />
             <Route path="/branches" element={<BranchesPage />} />
+            <Route path="/users" element={<UsersPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

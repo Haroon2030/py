@@ -1,14 +1,16 @@
 from rest_framework import viewsets, status, permissions
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.db.models import Q, Count
 from django.utils import timezone
 from .models import Branch, ArchiveDocument
 from .serializers import (
     BranchSerializer, ArchiveDocumentSerializer,
-    ArchiveDocumentUploadSerializer, UserSerializer
+    ArchiveDocumentUploadSerializer, UserSerializer,
+    UserManagementSerializer, UserCreateSerializer
 )
 
 
@@ -96,3 +98,44 @@ class ArchiveDocumentViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         instance.pdf_file.delete()
         instance.delete()
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('-date_joined')
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserCreateSerializer
+        return UserManagementSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search = self.request.query_params.get('search', '')
+        if search:
+            qs = qs.filter(
+                Q(username__icontains=search) |
+                Q(email__icontains=search) |
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search)
+            )
+        return qs
+
+    @action(detail=True, methods=['post'])
+    def toggle_active(self, request, pk=None):
+        user = self.get_object()
+        if user == request.user:
+            return Response({'error': 'لا يمكنك تعطيل حسابك'}, status=400)
+        user.is_active = not user.is_active
+        user.save()
+        return Response(UserManagementSerializer(user).data)
+
+    @action(detail=True, methods=['post'])
+    def reset_password(self, request, pk=None):
+        user = self.get_object()
+        new_password = request.data.get('password', '')
+        if len(new_password) < 6:
+            return Response({'error': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'}, status=400)
+        user.set_password(new_password)
+        user.save()
+        return Response({'message': f'تم تغيير كلمة مرور {user.username} بنجاح'})

@@ -9,6 +9,34 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'date_joined', 'last_login']
 
 
+class UserManagementSerializer(serializers.ModelSerializer):
+    document_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name',
+                  'is_active', 'is_staff', 'date_joined', 'last_login', 'document_count']
+        read_only_fields = ['date_joined', 'last_login', 'document_count']
+
+    def get_document_count(self, obj):
+        return obj.archivedocument_set.count()
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'password', 'is_staff']
+
+    def create(self, validated_data):
+        password = validated_data.pop('password')
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+
+
 class BranchSerializer(serializers.ModelSerializer):
     document_count = serializers.SerializerMethodField()
 
