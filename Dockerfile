@@ -25,11 +25,10 @@ COPY . .
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Make entrypoint executable and fix line endings
-RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
-
 # Expose port
 EXPOSE 8000
 
-# Run entrypoint (migrate + create superuser + start server)
-CMD ["./entrypoint.sh"]
+# Run migrate, create superuser, then start gunicorn
+CMD python manage.py migrate --noinput && \
+    python manage.py shell -c "from django.contrib.auth.models import User; User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin123')" && \
+    gunicorn --bind 0.0.0.0:8000 --workers 3 student_portal.wsgi:application
