@@ -106,16 +106,40 @@ export default function DocumentDetailPage() {
         {/* PDF Preview */}
         <div className="lg:col-span-3">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-4 border-b border-gray-100 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-red-500" />
-              <h3 className="font-semibold text-gray-700">معاينة الملف</h3>
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-red-500" />
+                <h3 className="font-semibold text-gray-700">معاينة الملف</h3>
+              </div>
+              <a
+                href={doc.pdf_file}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm text-purple-600 hover:underline"
+              >
+                فتح في نافذة جديدة ↗
+              </a>
             </div>
-            <iframe
-              src={doc.pdf_file}
-              className="w-full border-0"
+            <object
+              data={`${doc.pdf_file}#toolbar=1&navpanes=0&scrollbar=1`}
+              type="application/pdf"
+              className="w-full"
               style={{ height: '700px' }}
-              title="PDF Preview"
-            />
+            >
+              <div className="flex flex-col items-center justify-center h-96 text-gray-400">
+                <FileText className="w-16 h-16 mb-4" />
+                <p className="text-lg font-medium mb-2">لا يمكن عرض الملف</p>
+                <p className="text-sm mb-4">المتصفح لا يدعم عرض PDF مباشرة</p>
+                <a
+                  href={doc.pdf_file}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="gradient-primary text-white px-6 py-2 rounded-lg text-sm"
+                >
+                  تحميل الملف
+                </a>
+              </div>
+            </object>
           </div>
         </div>
       </div>

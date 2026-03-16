@@ -149,6 +149,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Allow PDF preview in iframe (same-origin only)
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
