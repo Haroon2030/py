@@ -25,8 +25,11 @@ COPY . .
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
+# Make entrypoint executable
+RUN chmod +x entrypoint.sh
+
 # Expose port
 EXPOSE 8000
 
-# Run with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "student_portal.wsgi:application"]
+# Run entrypoint (migrate + create superuser + start server)
+CMD ["./entrypoint.sh"]
