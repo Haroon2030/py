@@ -25,8 +25,8 @@ COPY . .
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Make entrypoint executable
-RUN chmod +x entrypoint.sh
+# Make entrypoint executable and fix line endings
+RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
 
 # Expose port
 EXPOSE 8000
