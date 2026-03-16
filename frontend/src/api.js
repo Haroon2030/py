@@ -33,6 +33,7 @@ export const statsAPI = {
 export const branchAPI = {
   list: () => api.get('/branches/?format=json'),
   create: (name) => api.post('/branches/', { name }),
+  update: (id, name) => api.patch(`/branches/${id}/`, { name }),
   delete: (id) => api.delete(`/branches/${id}/`),
 };
 
