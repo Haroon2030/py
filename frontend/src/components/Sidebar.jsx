@@ -4,28 +4,16 @@ import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Archive, Upload, Building2, LayoutDashboard,
-  LogOut, User, ChevronRight, Menu, X, Users, Sparkles
+  LogOut, ChevronLeft, Menu, X, Users, Sparkles, Shield
 } from 'lucide-react';
 
 const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'لوحة التحكم', color: 'from-purple-500 to-indigo-500', glow: 'shadow-purple-500/30' },
-  { path: '/archive', icon: Archive, label: 'الأرشيف', color: 'from-blue-500 to-cyan-500', glow: 'shadow-blue-500/30' },
-  { path: '/upload', icon: Upload, label: 'رفع ملف جديد', color: 'from-emerald-500 to-teal-500', glow: 'shadow-emerald-500/30' },
-  { path: '/branches', icon: Building2, label: 'إدارة الفروع', color: 'from-orange-500 to-amber-500', glow: 'shadow-orange-500/30' },
-  { path: '/users', icon: Users, label: 'المستخدمين', color: 'from-pink-500 to-rose-500', glow: 'shadow-pink-500/30' },
+  { path: '/', icon: LayoutDashboard, label: 'لوحة التحكم' },
+  { path: '/archive', icon: Archive, label: 'الأرشيف' },
+  { path: '/upload', icon: Upload, label: 'رفع ملف جديد' },
+  { path: '/branches', icon: Building2, label: 'إدارة الفروع' },
+  { path: '/users', icon: Users, label: 'المستخدمين' },
 ];
-
-const iconVariants = {
-  rest: { scale: 1, rotate: 0 },
-  hover: { scale: 1.2, rotate: [0, -10, 10, -5, 0], transition: { duration: 0.5, ease: 'easeInOut' } },
-  tap: { scale: 0.9 },
-  active: { scale: [1, 1.15, 1], transition: { duration: 0.4 } },
-};
-
-const glowVariants = {
-  rest: { opacity: 0, scale: 0.8 },
-  hover: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
-};
 
 export default function Sidebar() {
   const { user, logout } = useAuth();
@@ -38,114 +26,116 @@ export default function Sidebar() {
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="p-6 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <motion.div
-            className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30"
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Archive className="w-5 h-5 text-white" />
-          </motion.div>
-          <div>
-            <h1 className="text-white font-bold text-lg leading-tight">الأرشيف</h1>
-            <p className="text-gray-400 text-xs flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-yellow-400" />
-              نظام إدارة الملفات
-            </p>
+    <div className="flex flex-col h-full relative overflow-hidden">
+      {/* Layered Background */}
+      <div className="absolute inset-0 sidebar-bg" />
+      <div className="absolute inset-0 sidebar-glow-top" />
+      <div className="absolute inset-0 sidebar-glow-bottom" />
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Logo */}
+        <div className="p-5 pb-4 border-b border-white/[0.06]">
+          <div className="flex items-center gap-3">
+            <motion.div
+              className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/25"
+              whileHover={{ scale: 1.08, rotate: 3 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Archive className="w-5 h-5 text-white" />
+            </motion.div>
+            <div>
+              <h1 className="text-white font-bold text-lg leading-tight tracking-tight">الأرشيف</h1>
+              <p className="text-blue-300/40 text-[11px] flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-400/60" />
+                نظام إدارة الملفات
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Nav Items */}
-      <nav className="flex-1 p-4 space-y-1.5">
-        {navItems.map((navItem) => (
-          <NavLink
-            key={navItem.path}
-            to={navItem.path}
-            onClick={() => setMobileOpen(false)}
-            className="block"
-          >
-            {({ isActive }) => (
-              <motion.div
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 relative overflow-hidden ${
-                  isActive
-                    ? 'bg-white/10 text-white'
-                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                }`}
-                initial="rest"
-                whileHover="hover"
-                whileTap="tap"
-                animate={isActive ? 'active' : 'rest'}
-              >
-                {/* Active indicator bar */}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className={`absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-l-full bg-gradient-to-b ${navItem.color}`}
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  />
-                )}
+        {/* Navigation */}
+        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+          {navItems.map((navItem) => (
+            <NavLink
+              key={navItem.path}
+              to={navItem.path}
+              onClick={() => setMobileOpen(false)}
+              className="block"
+            >
+              {({ isActive }) => (
+                <motion.div
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 relative ${
+                    isActive
+                      ? 'bg-white/[0.08] text-white'
+                      : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                  }`}
+                  whileHover={{ x: isActive ? 0 : -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {/* Active Bar */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="navIndicator"
+                      className="absolute right-0 top-2 bottom-2 w-[3px] rounded-l-full bg-gradient-to-b from-blue-400 to-violet-500"
+                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                    />
+                  )}
 
-                {/* Icon container */}
-                <div className="relative">
-                  <motion.div variants={glowVariants} className={`absolute inset-0 rounded-lg bg-gradient-to-br ${navItem.color} blur-md opacity-0`} />
+                  {/* Icon */}
                   <motion.div
-                    variants={iconVariants}
-                    className={`relative w-9 h-9 rounded-lg flex items-center justify-center ${
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300 ${
                       isActive
-                        ? `bg-gradient-to-br ${navItem.color} shadow-lg ${navItem.glow}`
-                        : 'bg-white/5'
+                        ? 'bg-gradient-to-br from-blue-500 to-violet-600 shadow-md shadow-blue-500/30'
+                        : 'bg-white/[0.05] group-hover:bg-white/[0.08]'
                     }`}
+                    whileHover={{ scale: 1.05 }}
                   >
                     <navItem.icon className="w-[18px] h-[18px]" />
                   </motion.div>
-                </div>
 
-                <span className="font-medium text-sm">{navItem.label}</span>
+                  <span className="font-medium text-sm">{navItem.label}</span>
 
-                <motion.div
-                  className="mr-auto"
-                  variants={{ rest: { x: 5, opacity: 0 }, hover: { x: 0, opacity: 1 } }}
-                >
-                  <ChevronRight className="w-4 h-4" />
+                  {isActive && (
+                    <motion.div
+                      className="mr-auto"
+                      initial={{ opacity: 0, x: 5 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <ChevronLeft className="w-4 h-4 text-blue-400/40" />
+                    </motion.div>
+                  )}
                 </motion.div>
-              </motion.div>
-            )}
-          </NavLink>
-        ))}
-      </nav>
+              )}
+            </NavLink>
+          ))}
+        </nav>
 
-      {/* User Section */}
-      <div className="p-4 border-t border-white/10">
-        <motion.div
-          className="flex items-center gap-3 px-3 py-2 mb-2 rounded-xl hover:bg-white/5 transition-colors cursor-default"
-          whileHover={{ scale: 1.02 }}
-        >
-          <motion.div
-            className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/20"
-            whileHover={{ rotate: [0, -5, 5, 0] }}
-          >
-            <User className="w-4 h-4 text-white" />
-          </motion.div>
-          <div>
-            <p className="text-white text-sm font-medium">{user?.username}</p>
-            <p className="text-gray-500 text-xs">مدير النظام</p>
+        {/* User Section */}
+        <div className="p-4 pt-3 border-t border-white/[0.06]">
+          <div className="flex items-center gap-3 px-2 py-2 mb-2">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/20 ring-2 ring-white/10">
+              <span className="text-white font-bold text-sm">{user?.username?.charAt(0)?.toUpperCase()}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-semibold truncate">{user?.username}</p>
+              <p className="text-slate-500 text-[11px] flex items-center gap-1">
+                <Shield className="w-3 h-3" />
+                مدير النظام
+              </p>
+            </div>
           </div>
-        </motion.div>
-        <motion.button
-          onClick={handleLogout}
-          className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
-          whileHover={{ x: -3 }}
-          whileTap={{ scale: 0.97 }}
-        >
-          <motion.div whileHover={{ rotate: -15 }}>
+          <motion.button
+            onClick={handleLogout}
+            className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-red-400/70 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200"
+            whileHover={{ x: -3 }}
+            whileTap={{ scale: 0.97 }}
+          >
             <LogOut className="w-4 h-4" />
-          </motion.div>
-          <span className="text-sm">تسجيل الخروج</span>
-        </motion.button>
+            <span className="text-sm">تسجيل الخروج</span>
+          </motion.button>
+        </div>
       </div>
     </div>
   );
@@ -155,7 +145,7 @@ export default function Sidebar() {
       {/* Mobile Toggle */}
       <motion.button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-xl bg-gray-900 text-white shadow-lg"
+        className="lg:hidden fixed top-4 right-4 z-50 w-10 h-10 rounded-xl sidebar-bg text-white shadow-xl shadow-black/20 flex items-center justify-center border border-white/10"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
@@ -173,7 +163,7 @@ export default function Sidebar() {
       </motion.button>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block fixed right-0 top-0 w-64 h-screen bg-gray-900 z-40">
+      <aside className="hidden lg:block fixed right-0 top-0 w-64 h-screen z-40 overflow-hidden">
         <SidebarContent />
       </aside>
 
@@ -185,7 +175,7 @@ export default function Sidebar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
@@ -193,7 +183,7 @@ export default function Sidebar() {
               animate={{ x: 0 }}
               exit={{ x: 260 }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="lg:hidden fixed right-0 top-0 w-64 h-screen bg-gray-900 z-50"
+              className="lg:hidden fixed right-0 top-0 w-64 h-screen z-50 overflow-hidden"
             >
               <SidebarContent />
             </motion.aside>

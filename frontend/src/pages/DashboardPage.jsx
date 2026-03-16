@@ -24,17 +24,6 @@ const floatingIcon = {
   }
 };
 
-const pulseGlow = {
-  animate: {
-    boxShadow: [
-      '0 0 0 0 rgba(139,92,246,0.4)',
-      '0 0 20px 10px rgba(139,92,246,0.1)',
-      '0 0 0 0 rgba(139,92,246,0.0)',
-    ],
-    transition: { duration: 2, repeat: Infinity }
-  }
-};
-
 export default function DashboardPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
@@ -51,7 +40,7 @@ export default function DashboardPage() {
     return (
       <div className="flex items-center justify-center h-96">
         <motion.div
-          className="w-14 h-14 border-4 border-purple-200 border-t-purple-600 rounded-full"
+          className="w-14 h-14 border-4 border-blue-200 border-t-blue-600 rounded-full"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
@@ -62,15 +51,16 @@ export default function DashboardPage() {
   return (
     <motion.div variants={container} initial="hidden" animate="show">
       {/* Welcome Header */}
-      <motion.div variants={item} className="gradient-primary rounded-2xl p-8 mb-8 text-white relative overflow-hidden">
+      <motion.div variants={item} className="rounded-2xl p-8 mb-8 text-white relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #1e3a5f 0%, #3b82f6 50%, #8b5cf6 100%)' }}
+      >
         <div className="absolute top-0 left-0 w-72 h-72 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full translate-x-1/4 translate-y-1/4" />
-        {/* Floating sparkles */}
         <motion.div className="absolute top-6 left-20" animate={{ y: [0,-8,0], rotate: [0,15,-15,0], opacity: [0.5,1,0.5] }} transition={{ duration: 3, repeat: Infinity }}>
-          <Sparkles className="w-5 h-5 text-yellow-300/60" />
+          <Sparkles className="w-5 h-5 text-amber-300/60" />
         </motion.div>
         <motion.div className="absolute bottom-8 left-40" animate={{ y: [0,6,0], rotate: [0,-10,10,0], opacity: [0.3,0.8,0.3] }} transition={{ duration: 4, repeat: Infinity, delay: 1 }}>
-          <Zap className="w-4 h-4 text-yellow-300/40" />
+          <Zap className="w-4 h-4 text-amber-300/40" />
         </motion.div>
         <div className="relative">
           <h1 className="text-3xl font-bold mb-2">مرحباً بك، {user?.username} 👋</h1>
@@ -80,19 +70,18 @@ export default function DashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <motion.div variants={item} className="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-purple-200 transition-all duration-300">
+        <motion.div variants={item} className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-blue-200 transition-all duration-300">
           <div className="flex items-center justify-between mb-4">
             <motion.div
-              className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center"
+              className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/20"
               whileHover={{ scale: 1.1, rotate: [0,-5,5,0] }}
-              {...pulseGlow}
             >
               <motion.div {...floatingIcon}>
                 <FileText className="w-7 h-7 text-white" />
               </motion.div>
             </motion.div>
             <motion.div
-              className="flex items-center text-green-500 text-sm bg-green-50 px-2.5 py-1 rounded-full"
+              className="flex items-center text-emerald-600 text-sm bg-emerald-50 px-2.5 py-1 rounded-full"
               initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5, type: 'spring' }}
             >
               <TrendingUp className="w-3.5 h-3.5 ml-1" />
@@ -110,10 +99,10 @@ export default function DashboardPage() {
           <p className="text-gray-500 text-sm mt-1">إجمالي الملفات</p>
         </motion.div>
 
-        <motion.div variants={item} className="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-green-200 transition-all duration-300">
+        <motion.div variants={item} className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-teal-200 transition-all duration-300">
           <div className="flex items-center justify-between mb-4">
             <motion.div
-              className="w-14 h-14 rounded-2xl gradient-success flex items-center justify-center"
+              className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-teal-500/20"
               whileHover={{ scale: 1.1, rotate: [0,-5,5,0] }}
             >
               <motion.div {...floatingIcon}>
@@ -121,7 +110,7 @@ export default function DashboardPage() {
               </motion.div>
             </motion.div>
             <motion.div
-              className="flex items-center text-blue-500 text-sm bg-blue-50 px-2.5 py-1 rounded-full"
+              className="flex items-center text-blue-600 text-sm bg-blue-50 px-2.5 py-1 rounded-full"
               initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.6, type: 'spring' }}
             >
               <Clock className="w-3.5 h-3.5 ml-1" />
@@ -139,10 +128,10 @@ export default function DashboardPage() {
           <p className="text-gray-500 text-sm mt-1">ملفات اليوم</p>
         </motion.div>
 
-        <motion.div variants={item} className="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-pink-200 transition-all duration-300">
+        <motion.div variants={item} className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-violet-200 transition-all duration-300">
           <div className="flex items-center justify-between mb-4">
             <motion.div
-              className="w-14 h-14 rounded-2xl gradient-danger flex items-center justify-center"
+              className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20"
               whileHover={{ scale: 1.1, rotate: [0,-5,5,0] }}
             >
               <motion.div {...floatingIcon}>
@@ -164,72 +153,72 @@ export default function DashboardPage() {
 
       {/* Quick Actions */}
       <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Link to="/upload" className="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-purple-200 transition-all duration-300">
+        <Link to="/upload" className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-blue-200 transition-all duration-300">
           <div className="flex items-center gap-4">
             <motion.div
-              className="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors"
+              className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors"
               whileHover={{ scale: 1.1, y: -3 }}
             >
-              <Upload className="w-7 h-7 text-purple-600" />
+              <Upload className="w-7 h-7 text-blue-600" />
             </motion.div>
             <div className="flex-1">
               <h3 className="font-bold text-gray-800 text-lg">رفع ملف جديد</h3>
               <p className="text-gray-500 text-sm">رفع ملف مطابقة يومية جديد</p>
             </div>
             <motion.div whileHover={{ x: -5, y: -5 }}>
-              <ArrowUpLeft className="w-5 h-5 text-gray-300 group-hover:text-purple-500 transition-colors" />
+              <ArrowUpLeft className="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors" />
             </motion.div>
           </div>
         </Link>
 
-        <Link to="/archive" className="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-green-200 transition-all duration-300">
+        <Link to="/archive" className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-teal-200 transition-all duration-300">
           <div className="flex items-center gap-4">
             <motion.div
-              className="w-14 h-14 rounded-2xl bg-green-50 flex items-center justify-center group-hover:bg-green-100 transition-colors"
+              className="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center group-hover:bg-teal-100 transition-colors"
               whileHover={{ scale: 1.1, y: -3 }}
             >
-              <FileText className="w-7 h-7 text-green-600" />
+              <FileText className="w-7 h-7 text-teal-600" />
             </motion.div>
             <div className="flex-1">
               <h3 className="font-bold text-gray-800 text-lg">عرض الأرشيف</h3>
               <p className="text-gray-500 text-sm">تصفح وإدارة الملفات المحفوظة</p>
             </div>
             <motion.div whileHover={{ x: -5, y: -5 }}>
-              <ArrowUpLeft className="w-5 h-5 text-gray-300 group-hover:text-green-500 transition-colors" />
+              <ArrowUpLeft className="w-5 h-5 text-gray-300 group-hover:text-teal-500 transition-colors" />
             </motion.div>
           </div>
         </Link>
 
-        <Link to="/users" className="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-lg hover:border-pink-200 transition-all duration-300">
+        <Link to="/users" className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-violet-200 transition-all duration-300">
           <div className="flex items-center gap-4">
             <motion.div
-              className="w-14 h-14 rounded-2xl bg-pink-50 flex items-center justify-center group-hover:bg-pink-100 transition-colors"
+              className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center group-hover:bg-violet-100 transition-colors"
               whileHover={{ scale: 1.1, y: -3 }}
             >
-              <Users className="w-7 h-7 text-pink-600" />
+              <Users className="w-7 h-7 text-violet-600" />
             </motion.div>
             <div className="flex-1">
               <h3 className="font-bold text-gray-800 text-lg">المستخدمين</h3>
               <p className="text-gray-500 text-sm">إدارة حسابات المستخدمين</p>
             </div>
             <motion.div whileHover={{ x: -5, y: -5 }}>
-              <ArrowUpLeft className="w-5 h-5 text-gray-300 group-hover:text-pink-500 transition-colors" />
+              <ArrowUpLeft className="w-5 h-5 text-gray-300 group-hover:text-violet-500 transition-colors" />
             </motion.div>
           </div>
         </Link>
       </motion.div>
 
       {/* Recent Documents */}
-      <motion.div variants={item} className="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div className="p-6 border-b border-gray-100">
+      <motion.div variants={item} className="bg-white rounded-2xl shadow-sm border border-slate-100">
+        <div className="p-6 border-b border-slate-100">
           <h2 className="font-bold text-lg text-gray-800 flex items-center gap-2">
             <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}>
-              <Clock className="w-5 h-5 text-purple-500" />
+              <Clock className="w-5 h-5 text-blue-500" />
             </motion.div>
             آخر الملفات المرفوعة
           </h2>
         </div>
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-slate-50">
           {stats?.recent_documents?.length > 0 ? (
             stats.recent_documents.map((doc, index) => (
               <motion.div
@@ -240,7 +229,7 @@ export default function DashboardPage() {
               >
                 <Link
                   to={`/archive/${doc.id}`}
-                  className="flex items-center justify-between p-4 px-6 hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between p-4 px-6 hover:bg-blue-50/30 transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <motion.div

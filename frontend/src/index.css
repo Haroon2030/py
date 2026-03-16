@@ -6,25 +6,134 @@
     font-family: 'Tajawal', sans-serif;
   }
   body {
-    @apply bg-gray-50 text-gray-800;
+    @apply bg-slate-50 text-gray-800;
     direction: rtl;
+  }
+  ::selection {
+    background: rgba(59, 130, 246, 0.15);
+    color: #1e40af;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg;
+    @apply bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg;
   }
+  /* Primary: Blue → Violet (Professional & Modern) */
   .gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
   }
+  /* Success: Emerald (Clean) */
   .gradient-success {
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
   }
+  /* Danger: Rose-Red (Attention) */
   .gradient-danger {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
   }
+  /* Warning: Amber (Warm) */
   .gradient-warning {
-    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  }
+  /* Info: Cyan-Teal */
+  .gradient-info {
+    background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+  }
+
+  /* === Modern Form System 2026 === */
+  .fi-group {
+    position: relative;
+  }
+  .fi-label {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.5rem;
+  }
+  .fi-label svg {
+    width: 1rem;
+    height: 1rem;
+    color: #3b82f6;
+  }
+  .fi-input {
+    width: 100%;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.3s ease-out;
+  }
+  .fi-input::placeholder {
+    color: #cbd5e1;
+  }
+  .fi-input:hover:not(:focus) {
+    border-color: #cbd5e1;
+  }
+  .fi-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    background: #fff;
+  }
+  .fi-select {
+    width: 100%;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.3s ease-out;
+    appearance: none;
+    cursor: pointer;
+  }
+  .fi-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+  .fi-textarea {
+    width: 100%;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.3s ease-out;
+    resize: none;
+  }
+  .fi-textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  }
+  .fi-card {
+    background: #fff;
+    border-radius: 1rem;
+    border: 1px solid #f1f5f9;
+    padding: 1.25rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+  }
+  .fi-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    border-color: #e2e8f0;
+  }
+
+  /* Sidebar Design Tokens */
+  .sidebar-bg {
+    background: linear-gradient(180deg, #0c1631 0%, #111d42 50%, #0a1228 100%);
+  }
+  .sidebar-glow-top {
+    background: radial-gradient(ellipse at top right, rgba(59,130,246,0.08) 0%, transparent 60%);
+  }
+  .sidebar-glow-bottom {
+    background: radial-gradient(ellipse at bottom left, rgba(139,92,246,0.06) 0%, transparent 60%);
   }
 }

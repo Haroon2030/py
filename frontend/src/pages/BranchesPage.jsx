@@ -7,6 +7,13 @@ import {
   Hash, TrendingUp, Sparkles, Edit3, Check, X, ChevronUp, ChevronDown
 } from 'lucide-react';
 
+// Color tokens for consistent theming
+const colors = {
+  primary: { gradient: 'from-blue-500 to-violet-600', shadow: 'shadow-blue-500/20', bg: 'bg-blue-50', text: 'text-blue-600', ring: 'ring-blue-500/10', border: 'border-blue-200' },
+  info: { gradient: 'from-cyan-500 to-blue-500', shadow: 'shadow-cyan-500/20', bg: 'bg-cyan-50', text: 'text-cyan-600' },
+  success: { gradient: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-500/20', bg: 'bg-emerald-50', text: 'text-emerald-600' },
+};
+
 const rowVariants = {
   hidden: { opacity: 0, y: 12 },
   visible: (i) => ({
@@ -100,8 +107,8 @@ export default function BranchesPage() {
 
   const SortIcon = ({ field }) => (
     <span className="inline-flex flex-col mr-1">
-      <ChevronUp className={`w-3 h-3 -mb-1 transition-colors ${sortField === field && sortDir === 'asc' ? 'text-purple-600' : 'text-gray-300'}`} />
-      <ChevronDown className={`w-3 h-3 transition-colors ${sortField === field && sortDir === 'desc' ? 'text-purple-600' : 'text-gray-300'}`} />
+              <ChevronUp className={`w-3 h-3 -mb-1 transition-colors ${sortField === field && sortDir === 'asc' ? 'text-blue-600' : 'text-gray-300'}`} />
+      <ChevronDown className={`w-3 h-3 transition-colors ${sortField === field && sortDir === 'desc' ? 'text-blue-600' : 'text-gray-300'}`} />
     </span>
   );
 
@@ -126,9 +133,9 @@ export default function BranchesPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
         {[
-          { label: 'إجمالي الفروع', value: branches.length, icon: Building2, color: 'from-purple-500 to-indigo-600', glow: 'shadow-purple-500/20' },
-          { label: 'إجمالي الملفات', value: totalDocs, icon: FileText, color: 'from-blue-500 to-cyan-500', glow: 'shadow-blue-500/20' },
-          { label: 'متوسط الملفات/فرع', value: branches.length ? Math.round(totalDocs / branches.length) : 0, icon: TrendingUp, color: 'from-emerald-500 to-teal-500', glow: 'shadow-emerald-500/20' },
+          { label: 'إجمالي الفروع', value: branches.length, icon: Building2, color: colors.primary.gradient, glow: colors.primary.shadow },
+          { label: 'إجمالي الملفات', value: totalDocs, icon: FileText, color: colors.info.gradient, glow: colors.info.shadow },
+          { label: 'متوسط الملفات/فرع', value: branches.length ? Math.round(totalDocs / branches.length) : 0, icon: TrendingUp, color: colors.success.gradient, glow: colors.success.shadow },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -167,12 +174,12 @@ export default function BranchesPage() {
       >
         <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
-            <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400" />
+            <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400" />
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pr-11 pl-4 focus:outline-none focus:border-purple-400 focus:bg-white focus:ring-2 focus:ring-purple-100 transition-all"
+              className="fi-input pr-11"
               placeholder="أدخل اسم الفرع الجديد..."
               required
             />
@@ -182,7 +189,7 @@ export default function BranchesPage() {
             whileTap={{ scale: 0.97 }}
             type="submit"
             disabled={adding}
-            className="gradient-primary text-white font-medium py-3 px-8 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-purple-500/25 whitespace-nowrap"
+            className="bg-gradient-to-l from-blue-500 to-violet-600 text-white font-medium py-3 px-8 rounded-xl hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 whitespace-nowrap"
           >
             {adding ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -205,10 +212,10 @@ export default function BranchesPage() {
         <div className="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <h2 className="font-bold text-gray-800 flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-purple-500" />
+              <Building2 className="w-5 h-5 text-blue-500" />
               قائمة الفروع
             </h2>
-            <span className="px-3 py-1 rounded-full bg-gradient-to-l from-purple-600 to-indigo-600 text-white text-xs font-bold">
+            <span className="px-3 py-1 rounded-full bg-gradient-to-l from-blue-500 to-violet-600 text-white text-xs font-bold">
               {filtered.length}
             </span>
           </div>
@@ -219,14 +226,14 @@ export default function BranchesPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="بحث في الفروع..."
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2 pr-10 pl-4 text-sm focus:outline-none focus:border-purple-300 focus:bg-white transition-all"
+              className="w-full bg-white border-2 border-slate-200 rounded-xl py-2 pr-10 pl-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300"
             />
           </div>
         </div>
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mb-4" />
+            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
             <p className="text-gray-400 text-sm">جاري تحميل الفروع...</p>
           </div>
         ) : filtered.length > 0 ? (
@@ -240,7 +247,7 @@ export default function BranchesPage() {
                       <Hash className="w-4 h-4 inline" />
                     </th>
                     <th
-                      className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-purple-600 transition-colors select-none"
+                      className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-blue-600 transition-colors select-none"
                       onClick={() => toggleSort('name')}
                     >
                       <span className="flex items-center gap-1">
@@ -249,7 +256,7 @@ export default function BranchesPage() {
                       </span>
                     </th>
                     <th
-                      className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-purple-600 transition-colors select-none"
+                      className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-blue-600 transition-colors select-none"
                       onClick={() => toggleSort('docs')}
                     >
                       <span className="flex items-center gap-1">
@@ -258,7 +265,7 @@ export default function BranchesPage() {
                       </span>
                     </th>
                     <th
-                      className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-purple-600 transition-colors select-none"
+                      className="text-right py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-blue-600 transition-colors select-none"
                       onClick={() => toggleSort('date')}
                     >
                       <span className="flex items-center gap-1">
@@ -282,10 +289,10 @@ export default function BranchesPage() {
                         animate="visible"
                         exit="exit"
                         layout
-                        className="border-b border-gray-50 last:border-0 hover:bg-purple-50/40 transition-all group"
+                        className="border-b border-gray-50 last:border-0 hover:bg-blue-50/30 transition-all group"
                       >
                         <td className="py-4 px-6">
-                          <span className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 group-hover:bg-purple-100 group-hover:text-purple-600 transition-colors">
+                          <span className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
                             {idx + 1}
                           </span>
                         </td>
@@ -295,7 +302,7 @@ export default function BranchesPage() {
                               <input
                                 value={editName}
                                 onChange={(e) => setEditName(e.target.value)}
-                                className="bg-white border border-purple-300 rounded-lg py-1.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                                className="bg-white border-2 border-blue-400 rounded-lg py-1.5 px-3 text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10"
                                 autoFocus
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter') handleEdit(branch.id);
@@ -311,7 +318,7 @@ export default function BranchesPage() {
                             </div>
                           ) : (
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-md shadow-purple-500/20">
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-md shadow-blue-500/20">
                                 <Building2 className="w-5 h-5 text-white" />
                               </div>
                               <span className="font-bold text-gray-800">{branch.name}</span>
@@ -323,7 +330,7 @@ export default function BranchesPage() {
                             <div className="flex-1 max-w-[120px]">
                               <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
                                 <motion.div
-                                  className="h-full rounded-full bg-gradient-to-l from-purple-500 to-indigo-500"
+                                  className="h-full rounded-full bg-gradient-to-l from-blue-500 to-violet-500"
                                   initial={{ width: 0 }}
                                   animate={{ width: `${Math.min(100, ((branch.document_count || 0) / Math.max(1, ...branches.map(b => b.document_count || 0))) * 100)}%` }}
                                   transition={{ delay: 0.5 + idx * 0.1, duration: 0.8, ease: 'easeOut' }}
@@ -388,7 +395,7 @@ export default function BranchesPage() {
                     <div className="flex items-start gap-3">
                       {/* Icon & Number */}
                       <div className="relative flex-shrink-0">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                           <Building2 className="w-6 h-6 text-white" />
                         </div>
                         <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500">
@@ -403,7 +410,7 @@ export default function BranchesPage() {
                             <input
                               value={editName}
                               onChange={(e) => setEditName(e.target.value)}
-                              className="flex-1 bg-white border border-purple-300 rounded-lg py-1.5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+                            className="flex-1 bg-white border-2 border-blue-400 rounded-lg py-1.5 px-3 text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10"
                               autoFocus
                             />
                             <button onClick={() => handleEdit(branch.id)} className="p-1.5 rounded-lg bg-green-50 text-green-600">
@@ -433,7 +440,7 @@ export default function BranchesPage() {
                         <div className="mt-2.5">
                           <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
                             <motion.div
-                              className="h-full rounded-full bg-gradient-to-l from-purple-500 to-indigo-500"
+                              className="h-full rounded-full bg-gradient-to-l from-blue-500 to-violet-500"
                               initial={{ width: 0 }}
                               animate={{ width: `${Math.min(100, ((branch.document_count || 0) / Math.max(1, ...branches.map(b => b.document_count || 0))) * 100)}%` }}
                               transition={{ delay: 0.3 + idx * 0.08, duration: 0.6 }}

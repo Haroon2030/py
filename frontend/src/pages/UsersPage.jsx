@@ -117,7 +117,7 @@ export default function UsersPage() {
       <motion.div variants={item} className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div className="flex items-center gap-3">
           <motion.div
-            className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-lg shadow-pink-500/30"
+            className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg shadow-blue-500/25"
             whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
           >
             <Users className="w-6 h-6 text-white" />
@@ -129,7 +129,7 @@ export default function UsersPage() {
         </div>
         <motion.button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 gradient-primary text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-purple-500/25"
+          className="flex items-center gap-2 bg-gradient-to-l from-blue-500 to-violet-600 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-blue-500/25"
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -159,54 +159,54 @@ export default function UsersPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">اسم المستخدم *</label>
+                  <label className="fi-label">اسم المستخدم *</label>
                   <input
                     type="text"
                     value={form.username}
                     onChange={e => setForm({ ...form, username: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                    className="fi-input"
                     placeholder="username"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">البريد الإلكتروني</label>
+                  <label className="fi-label">البريد الإلكتروني</label>
                   <input
                     type="email"
                     value={form.email}
                     onChange={e => setForm({ ...form, email: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                    className="fi-input"
                     placeholder="user@example.com"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">الاسم الأول</label>
+                  <label className="fi-label">الاسم الأول</label>
                   <input
                     type="text"
                     value={form.first_name}
                     onChange={e => setForm({ ...form, first_name: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                    className="fi-input"
                     placeholder="الاسم الأول"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">الاسم الأخير</label>
+                  <label className="fi-label">الاسم الأخير</label>
                   <input
                     type="text"
                     value={form.last_name}
                     onChange={e => setForm({ ...form, last_name: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+                    className="fi-input"
                     placeholder="الاسم الأخير"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-600 mb-1">كلمة المرور *</label>
+                  <label className="fi-label">كلمة المرور *</label>
                   <div className="relative">
                     <input
                       type={showPass ? 'text' : 'password'}
                       value={form.password}
                       onChange={e => setForm({ ...form, password: e.target.value })}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all pl-10"
+                      className="fi-input pl-10"
                       placeholder="6 أحرف على الأقل"
                       required
                       minLength={6}
@@ -228,10 +228,10 @@ export default function UsersPage() {
                       onChange={e => setForm({ ...form, is_staff: e.target.checked })}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-purple-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-purple-600 after:content-[''] after:absolute after:top-0.5 after:-right-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:-translate-x-full peer-checked:after:-translate-x-0" />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:-right-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:-translate-x-full peer-checked:after:-translate-x-0" />
                   </label>
                   <span className="text-sm text-gray-600 flex items-center gap-1">
-                    <Shield className="w-4 h-4 text-purple-500" />
+                    <Shield className="w-4 h-4 text-blue-500" />
                     صلاحيات المدير
                   </span>
                 </div>
@@ -240,7 +240,7 @@ export default function UsersPage() {
               <motion.button
                 type="submit"
                 disabled={submitting}
-                className="gradient-primary text-white px-8 py-2.5 rounded-xl font-medium disabled:opacity-50"
+                className="bg-gradient-to-l from-blue-500 to-violet-600 text-white px-8 py-2.5 rounded-xl font-medium disabled:opacity-50 shadow-lg shadow-blue-500/20"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
               >
@@ -264,7 +264,7 @@ export default function UsersPage() {
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-white border border-gray-200 rounded-xl pr-12 pl-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+            className="w-full bg-white border-2 border-slate-200 rounded-xl pr-12 pl-4 py-3 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all duration-300"
             placeholder="بحث عن مستخدم..."
           />
         </div>
@@ -274,7 +274,7 @@ export default function UsersPage() {
       {loading ? (
         <div className="flex items-center justify-center h-48">
           <motion.div
-            className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full"
+            className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           />
@@ -291,7 +291,7 @@ export default function UsersPage() {
                 exit={{ opacity: 0, x: -100 }}
                 transition={{ delay: index * 0.05 }}
                 className={`bg-white rounded-2xl shadow-sm border p-5 hover:shadow-md transition-all duration-300 ${
-                  !u.is_active ? 'border-red-100 bg-red-50/30' : 'border-gray-100 hover:border-purple-200'
+                  !u.is_active ? 'border-red-100 bg-red-50/30' : 'border-slate-100 hover:border-blue-200'
                 }`}
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -299,8 +299,8 @@ export default function UsersPage() {
                   <motion.div
                     className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg ${
                       u.is_staff
-                        ? 'bg-gradient-to-br from-purple-500 to-indigo-600 shadow-purple-500/25'
-                        : 'bg-gradient-to-br from-blue-500 to-cyan-500 shadow-blue-500/25'
+                        ? 'bg-gradient-to-br from-blue-500 to-violet-600 shadow-blue-500/25'
+                        : 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-cyan-500/25'
                     }`}
                     whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
                   >
@@ -313,7 +313,7 @@ export default function UsersPage() {
                       <h3 className="font-bold text-gray-800">{u.username}</h3>
                       {u.is_staff && (
                         <motion.span
-                          className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium flex items-center gap-0.5"
+                          className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium flex items-center gap-0.5"
                           initial={{ scale: 0 }} animate={{ scale: 1 }}
                         >
                           <Shield className="w-2.5 h-2.5" /> مدير
@@ -433,7 +433,7 @@ export default function UsersPage() {
                   type={showNewPass ? 'text' : 'password'}
                   value={newPassword}
                   onChange={e => setNewPassword(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none pl-10"
+                  className="fi-input pl-10"
                   placeholder="كلمة المرور الجديدة (6 أحرف على الأقل)"
                   minLength={6}
                 />
@@ -448,7 +448,7 @@ export default function UsersPage() {
               <div className="flex gap-3">
                 <motion.button
                   onClick={handleResetPassword}
-                  className="flex-1 gradient-primary text-white py-2.5 rounded-xl font-medium"
+                  className="flex-1 bg-gradient-to-l from-blue-500 to-violet-600 text-white py-2.5 rounded-xl font-medium shadow-lg shadow-blue-500/20"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >

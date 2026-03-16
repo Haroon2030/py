@@ -69,14 +69,14 @@ export default function ArchiveListPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            <FileText className="w-7 h-7 text-purple-600" />
+            <FileText className="w-7 h-7 text-blue-600" />
             أرشيف ملفات المطابقة
           </h1>
           <p className="text-gray-500 text-sm mt-1">إدارة وحفظ ملفات المطابقة اليومية</p>
         </div>
         <Link
           to="/upload"
-          className="inline-flex items-center gap-2 gradient-primary text-white px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity shadow-lg shadow-purple-500/25"
+          className="inline-flex items-center gap-2 bg-gradient-to-l from-blue-500 to-violet-600 text-white px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity shadow-lg shadow-blue-500/25"
         >
           <Plus className="w-5 h-5" />
           رفع ملف جديد
@@ -94,7 +94,7 @@ export default function ArchiveListPage() {
               defaultValue={search}
               onKeyDown={(e) => e.key === 'Enter' && updateParam('search', e.target.value)}
               onBlur={(e) => updateParam('search', e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 pr-11 pl-4 focus:outline-none focus:border-purple-300 focus:bg-white transition-all"
+              className="w-full bg-white border-2 border-slate-200 rounded-xl py-2.5 pr-11 pl-4 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all duration-300"
             />
           </div>
           <div className="relative">
@@ -102,7 +102,7 @@ export default function ArchiveListPage() {
             <select
               value={branch}
               onChange={(e) => updateParam('branch', e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 pr-10 pl-4 focus:outline-none focus:border-purple-300 appearance-none"
+              className="w-full bg-white border-2 border-slate-200 rounded-xl py-2.5 pr-10 pl-4 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 appearance-none transition-all duration-300"
             >
               <option value="">جميع الفروع</option>
               {branches.map((b) => (
@@ -115,7 +115,7 @@ export default function ArchiveListPage() {
               type="date"
               value={dateFrom}
               onChange={(e) => updateParam('date_from', e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 px-4 focus:outline-none focus:border-purple-300"
+              className="w-full bg-white border-2 border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300"
               placeholder="من تاريخ"
             />
           </div>
@@ -124,7 +124,7 @@ export default function ArchiveListPage() {
               type="date"
               value={dateTo}
               onChange={(e) => updateParam('date_to', e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 px-4 focus:outline-none focus:border-purple-300"
+              className="w-full bg-white border-2 border-slate-200 rounded-xl py-2.5 px-4 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300"
               placeholder="إلى تاريخ"
             />
           </div>
@@ -135,7 +135,7 @@ export default function ArchiveListPage() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
           </div>
         ) : documents.length > 0 ? (
           <>
@@ -159,7 +159,7 @@ export default function ArchiveListPage() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: idx * 0.03 }}
-                      className="hover:bg-purple-50/30 transition-colors"
+                      className="hover:bg-blue-50/30 transition-colors"
                     >
                       <td className="py-4 px-6 text-gray-400 text-sm">{(page - 1) * 15 + idx + 1}</td>
                       <td className="py-4 px-6 font-semibold text-gray-800">{doc.employee_name}</td>
@@ -227,7 +227,7 @@ export default function ArchiveListPage() {
                     onClick={() => updateParam('page', String(p))}
                     className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
                       p === page
-                        ? 'gradient-primary text-white shadow-lg shadow-purple-500/25'
+                        ? 'bg-gradient-to-l from-blue-500 to-violet-600 text-white shadow-lg shadow-blue-500/25'
                         : 'hover:bg-gray-100 text-gray-600'
                     }`}
                   >
