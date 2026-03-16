@@ -25,5 +25,13 @@ urlpatterns = [
     path('', include('accounts.urls')),
 ]
 
-# Serve media files (in production, consider using nginx or a CDN)
+# Always serve media files (including production)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Also serve when DEBUG is False
+if not settings.DEBUG:
+    from django.views.static import serve
+    import re
+    urlpatterns += [
+        path('media/<path:path>', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
