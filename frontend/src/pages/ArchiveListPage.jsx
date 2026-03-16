@@ -2,14 +2,18 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { documentAPI, branchAPI } from '../api';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import {
   Search, Filter, FileText, Eye, Trash2,
   Plus, Calendar, Building2, ChevronLeft,
-  ChevronRight, User
+  ChevronRight, User, Edit3
 } from 'lucide-react';
 
+const PAGE_SIZE = 6;
+
 export default function ArchiveListPage() {
+  const { isAdmin } = useAuth();
   const [documents, setDocuments] = useState([]);
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,11 +27,13 @@ export default function ArchiveListPage() {
   const dateTo = searchParams.get('date_to') || '';
 
   useEffect(() => {
-    branchAPI.list().then(res => {
-      const data = res.data;
-      setBranches(Array.isArray(data) ? data : data.results || []);
-    });
-  }, []);
+    if (isAdmin) {
+      branchAPI.list().then(res => {
+        const data = res.data;
+        setBranches(Array.isArray(data) ? data : data.results || []);
+      });
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     setLoading(true);
@@ -39,7 +45,7 @@ export default function ArchiveListPage() {
 
     documentAPI.list(params).then(res => {
       setDocuments(res.data.results || []);
-      setTotalPages(Math.ceil((res.data.count || 0) / 15));
+      setTotalPages(Math.ceil((res.data.count || 0) / PAGE_SIZE));
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [page, search, branch, dateFrom, dateTo]);
@@ -58,8 +64,8 @@ export default function ArchiveListPage() {
       await documentAPI.delete(id);
       toast.success('تم حذف المستند بنجاح');
       setDocuments(docs => docs.filter(d => d.id !== id));
-    } catch {
-      toast.error('حدث خطأ أثناء الحذف');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'حدث خطأ أثناء الحذف');
     }
   };
 
@@ -85,8 +91,8 @@ export default function ArchiveListPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="md:col-span-2 relative">
+        <div className={`grid grid-cols-1 gap-4 ${isAdmin ? 'md:grid-cols-5' : 'md:grid-cols-4'}`}>
+          <div className={`${isAdmin ? 'md:col-span-2' : 'md:col-span-2'} relative`}>
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
@@ -97,19 +103,22 @@ export default function ArchiveListPage() {
               className="w-full bg-white border-2 border-slate-200 rounded-xl py-2.5 pr-11 pl-4 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all duration-300"
             />
           </div>
-          <div className="relative">
-            <Building2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <select
-              value={branch}
-              onChange={(e) => updateParam('branch', e.target.value)}
-              className="w-full bg-white border-2 border-slate-200 rounded-xl py-2.5 pr-10 pl-4 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 appearance-none transition-all duration-300"
-            >
-              <option value="">جميع الفروع</option>
-              {branches.map((b) => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
-          </div>
+          {/* فلتر الفرع للمدير فقط */}
+          {isAdmin && (
+            <div className="relative">
+              <Building2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <select
+                value={branch}
+                onChange={(e) => updateParam('branch', e.target.value)}
+                className="w-full bg-white border-2 border-slate-200 rounded-xl py-2.5 pr-10 pl-4 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 appearance-none transition-all duration-300"
+              >
+                <option value="">جميع الفروع</option>
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <input
               type="date"
@@ -161,10 +170,10 @@ export default function ArchiveListPage() {
                       transition={{ delay: idx * 0.03 }}
                       className="hover:bg-blue-50/30 transition-colors"
                     >
-                      <td className="py-4 px-6 text-gray-400 text-sm">{(page - 1) * 15 + idx + 1}</td>
+                      <td className="py-4 px-6 text-gray-400 text-sm">{(page - 1) * PAGE_SIZE + idx + 1}</td>
                       <td className="py-4 px-6 font-semibold text-gray-800">{doc.employee_name}</td>
                       <td className="py-4 px-6">
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium gradient-primary text-white">
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-l from-blue-500 to-violet-600 text-white">
                           {doc.branch_name}
                         </span>
                       </td>
@@ -191,18 +200,21 @@ export default function ArchiveListPage() {
                             href={doc.pdf_file}
                             target="_blank"
                             rel="noreferrer"
-                            className="p-2 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                            className="p-2 rounded-lg text-emerald-500 hover:bg-emerald-50 transition-colors"
                             title="تحميل PDF"
                           >
                             <FileText className="w-4 h-4" />
                           </a>
-                          <button
-                            onClick={() => handleDelete(doc.id, doc.employee_name)}
-                            className="p-2 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
-                            title="حذف"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {/* المدير فقط يحذف */}
+                          {isAdmin && (
+                            <button
+                              onClick={() => handleDelete(doc.id, doc.employee_name)}
+                              className="p-2 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                              title="حذف"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </motion.tr>
@@ -221,19 +233,31 @@ export default function ArchiveListPage() {
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => updateParam('page', String(p))}
-                    className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
-                      p === page
-                        ? 'bg-gradient-to-l from-blue-500 to-violet-600 text-white shadow-lg shadow-blue-500/25'
-                        : 'hover:bg-gray-100 text-gray-600'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
+                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                  let p;
+                  if (totalPages <= 7) {
+                    p = i + 1;
+                  } else if (page <= 4) {
+                    p = i + 1;
+                  } else if (page >= totalPages - 3) {
+                    p = totalPages - 6 + i;
+                  } else {
+                    p = page - 3 + i;
+                  }
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => updateParam('page', String(p))}
+                      className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
+                        p === page
+                          ? 'bg-gradient-to-l from-blue-500 to-violet-600 text-white shadow-lg shadow-blue-500/25'
+                          : 'hover:bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  );
+                })}
                 <button
                   disabled={page >= totalPages}
                   onClick={() => updateParam('page', String(page + 1))}
@@ -251,7 +275,7 @@ export default function ArchiveListPage() {
             <p className="text-gray-400 text-sm mb-6">ابدأ برفع ملف مطابقة جديد</p>
             <Link
               to="/upload"
-              className="inline-flex items-center gap-2 gradient-primary text-white px-6 py-3 rounded-xl font-medium"
+              className="inline-flex items-center gap-2 bg-gradient-to-l from-blue-500 to-violet-600 text-white px-6 py-3 rounded-xl font-medium"
             >
               <Plus className="w-5 h-5" />
               رفع ملف جديد

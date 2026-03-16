@@ -6,12 +6,20 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.db.models import Q, Count
 from django.utils import timezone
-from .models import Branch, ArchiveDocument
+from .models import Branch, ArchiveDocument, UserProfile
 from .serializers import (
     BranchSerializer, ArchiveDocumentSerializer,
     ArchiveDocumentUploadSerializer, UserSerializer,
     UserManagementSerializer, UserCreateSerializer
 )
+
+
+def _user_branch(user):
+    """الحصول على فرع المستخدم من الملف الشخصي"""
+    profile = getattr(user, 'profile', None)
+    if not profile:
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+    return profile.branch
 
 
 @api_view(['POST'])
@@ -46,10 +54,23 @@ def api_user(request):
 @api_view(['GET'])
 def api_stats(request):
     today = timezone.now().date()
-    total = ArchiveDocument.objects.count()
-    today_count = ArchiveDocument.objects.filter(created_at__date=today).count()
-    branches_count = Branch.objects.count()
-    recent = ArchiveDocument.objects.select_related('branch', 'uploaded_by')[:5]
+    user = request.user
+    branch = _user_branch(user)
+
+    # المدير يرى الكل - الموظف يرى فرعه فقط
+    if user.is_staff:
+        docs_qs = ArchiveDocument.objects.all()
+    else:
+        if branch:
+            docs_qs = ArchiveDocument.objects.filter(branch=branch)
+        else:
+            docs_qs = ArchiveDocument.objects.none()
+
+    total = docs_qs.count()
+    today_count = docs_qs.filter(created_at__date=today).count()
+    branches_count = Branch.objects.count() if user.is_staff else (1 if branch else 0)
+    recent = docs_qs.select_related('branch', 'uploaded_by')[:5]
+
     return Response({
         'total_documents': total,
         'today_documents': today_count,
@@ -61,6 +82,12 @@ def api_stats(request):
 class BranchViewSet(viewsets.ModelViewSet):
     queryset = Branch.objects.all()
     serializer_class = BranchSerializer
+    pagination_class = None  # الفروع بدون ترقيم - تُستخدم في القوائم المنسدلة
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAdminUser()]
+        return [permissions.IsAuthenticated()]
 
 
 class ArchiveDocumentViewSet(viewsets.ModelViewSet):
@@ -74,6 +101,16 @@ class ArchiveDocumentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+        user = self.request.user
+
+        # الموظف يرى فرعه فقط - المدير يرى الكل
+        if not user.is_staff:
+            branch = _user_branch(user)
+            if branch:
+                qs = qs.filter(branch=branch)
+            else:
+                return qs.none()
+
         search = self.request.query_params.get('search', '')
         if search:
             qs = qs.filter(
@@ -96,12 +133,26 @@ class ArchiveDocumentViewSet(viewsets.ModelViewSet):
         serializer.save(uploaded_by=self.request.user)
 
     def perform_destroy(self, instance):
+        # فقط المدير يمكنه الحذف
+        if not self.request.user.is_staff:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied('فقط المدير يمكنه حذف المستندات')
         instance.pdf_file.delete()
         instance.delete()
 
+    def perform_update(self, serializer):
+        # الموظف يعدل فقط مستندات فرعه
+        user = self.request.user
+        if not user.is_staff:
+            branch = _user_branch(user)
+            if branch and serializer.instance.branch_id != branch.id:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied('لا يمكنك تعديل مستندات فرع آخر')
+        serializer.save()
+
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all().order_by('-date_joined')
+    queryset = User.objects.select_related('profile', 'profile__branch').all().order_by('-date_joined')
     permission_classes = [permissions.IsAdminUser]
 
     def get_serializer_class(self):
@@ -139,3 +190,20 @@ class UserViewSet(viewsets.ModelViewSet):
         user.set_password(new_password)
         user.save()
         return Response({'message': f'تم تغيير كلمة مرور {user.username} بنجاح'})
+
+    @action(detail=True, methods=['post'])
+    def set_branch(self, request, pk=None):
+        """تعيين فرع للمستخدم"""
+        user = self.get_object()
+        branch_id = request.data.get('branch_id')
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        if branch_id:
+            try:
+                branch = Branch.objects.get(id=branch_id)
+                profile.branch = branch
+            except Branch.DoesNotExist:
+                return Response({'error': 'الفرع غير موجود'}, status=400)
+        else:
+            profile.branch = None
+        profile.save()
+        return Response(UserManagementSerializer(user).data)

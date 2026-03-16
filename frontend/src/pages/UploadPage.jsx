@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 export default function UploadPage() {
-  const { user } = useAuth();
+  const { user, isAdmin, userBranchId } = useAuth();
   const navigate = useNavigate();
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -30,6 +30,13 @@ export default function UploadPage() {
       setBranches(Array.isArray(data) ? data : data.results || []);
     });
   }, []);
+
+  // Auto-select branch for non-admin
+  useEffect(() => {
+    if (!isAdmin && userBranchId) {
+      setForm(f => ({ ...f, branch: String(userBranchId) }));
+    }
+  }, [isAdmin, userBranchId]);
 
   const onDrop = useCallback((acceptedFiles) => {
     const f = acceptedFiles[0];
@@ -164,8 +171,9 @@ export default function UploadPage() {
                   onChange={(e) => setForm({ ...form, branch: e.target.value })}
                   onFocus={() => setFocused('branch')}
                   onBlur={() => setFocused('')}
-                  className="fi-input appearance-none cursor-pointer pr-4"
+                  className={`fi-input appearance-none cursor-pointer pr-4 ${!isAdmin && userBranchId ? 'bg-slate-50 opacity-75' : ''}`}
                   required
+                  disabled={!isAdmin && !!userBranchId}
                 >
                   <option value="">اختر الفرع</option>
                   {branches.map((b) => (

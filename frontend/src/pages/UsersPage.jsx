@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { userAPI } from '../api';
+import { userAPI, branchAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import {
   Users, UserPlus, Search, Shield, ShieldOff,
   Key, Trash2, Mail, Calendar, FileText,
-  Eye, EyeOff, CheckCircle, XCircle, Sparkles
+  Eye, EyeOff, CheckCircle, XCircle, Sparkles,
+  Building2, ChevronLeft, ChevronRight
 } from 'lucide-react';
+
+const PAGE_SIZE = 6;
 
 const container = {
   hidden: { opacity: 0 },
@@ -21,20 +24,29 @@ const item = {
 export default function UsersPage() {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [resetModal, setResetModal] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [showNewPass, setShowNewPass] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // New user form
   const [form, setForm] = useState({
     username: '', email: '', first_name: '', last_name: '',
-    password: '', is_staff: false,
+    password: '', is_staff: false, branch: '',
   });
   const [showPass, setShowPass] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    branchAPI.list().then(res => {
+      const data = res.data;
+      setBranches(Array.isArray(data) ? data : data.results || []);
+    });
+  }, []);
 
   const fetchUsers = async () => {
     try {
@@ -47,7 +59,11 @@ export default function UsersPage() {
     }
   };
 
-  useEffect(() => { fetchUsers(); }, [search]);
+  useEffect(() => { setCurrentPage(1); fetchUsers(); }, [search]);
+
+  // ترقيم محلي
+  const totalPages = Math.ceil(users.length / PAGE_SIZE);
+  const paginatedUsers = users.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -57,9 +73,12 @@ export default function UsersPage() {
     }
     setSubmitting(true);
     try {
-      await userAPI.create(form);
+      const payload = { ...form };
+      if (payload.branch) payload.branch = parseInt(payload.branch);
+      else delete payload.branch;
+      await userAPI.create(payload);
       toast.success(`تم إنشاء المستخدم ${form.username} بنجاح`);
-      setForm({ username: '', email: '', first_name: '', last_name: '', password: '', is_staff: false });
+      setForm({ username: '', email: '', first_name: '', last_name: '', password: '', is_staff: false, branch: '' });
       setShowAddForm(false);
       fetchUsers();
     } catch (err) {
@@ -108,6 +127,16 @@ export default function UsersPage() {
       fetchUsers();
     } catch {
       toast.error('حدث خطأ أثناء الحذف');
+    }
+  };
+
+  const handleSetBranch = async (userId, branchId) => {
+    try {
+      await userAPI.setBranch(userId, branchId || null);
+      toast.success('تم تحديث الفرع');
+      fetchUsers();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'حدث خطأ');
     }
   };
 
@@ -220,6 +249,23 @@ export default function UsersPage() {
                     </button>
                   </div>
                 </div>
+                {/* اختيار الفرع */}
+                <div>
+                  <label className="fi-label">
+                    <Building2 className="w-4 h-4" />
+                    الفرع
+                  </label>
+                  <select
+                    value={form.branch}
+                    onChange={e => setForm({ ...form, branch: e.target.value })}
+                    className="fi-input appearance-none cursor-pointer"
+                  >
+                    <option value="">بدون فرع (مدير عام)</option>
+                    {branches.map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <div className="flex items-center gap-3 pt-6">
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -280,123 +326,177 @@ export default function UsersPage() {
           />
         </div>
       ) : (
-        <motion.div variants={item} className="grid gap-4">
-          <AnimatePresence>
-            {users.map((u, index) => (
-              <motion.div
-                key={u.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ delay: index * 0.05 }}
-                className={`bg-white rounded-2xl shadow-sm border p-5 hover:shadow-md transition-all duration-300 ${
-                  !u.is_active ? 'border-red-100 bg-red-50/30' : 'border-slate-100 hover:border-blue-200'
-                }`}
-              >
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  {/* Avatar */}
-                  <motion.div
-                    className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg ${
-                      u.is_staff
-                        ? 'bg-gradient-to-br from-blue-500 to-violet-600 shadow-blue-500/25'
-                        : 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-cyan-500/25'
-                    }`}
-                    whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-                  >
-                    {u.username.charAt(0).toUpperCase()}
-                  </motion.div>
-
-                  {/* User Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-gray-800">{u.username}</h3>
-                      {u.is_staff && (
-                        <motion.span
-                          className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium flex items-center gap-0.5"
-                          initial={{ scale: 0 }} animate={{ scale: 1 }}
-                        >
-                          <Shield className="w-2.5 h-2.5" /> مدير
-                        </motion.span>
-                      )}
-                      {u.is_active ? (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 flex items-center gap-0.5">
-                          <CheckCircle className="w-2.5 h-2.5" /> نشط
-                        </span>
-                      ) : (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 flex items-center gap-0.5">
-                          <XCircle className="w-2.5 h-2.5" /> معطل
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
-                      {u.email && (
-                        <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{u.email}</span>
-                      )}
-                      {(u.first_name || u.last_name) && (
-                        <span>{u.first_name} {u.last_name}</span>
-                      )}
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        انضم {new Date(u.date_joined).toLocaleDateString('ar-SA')}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <FileText className="w-3 h-3" />
-                        {u.document_count} ملف
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 self-end sm:self-center">
-                    <motion.button
-                      onClick={() => handleToggleActive(u.id)}
-                      className={`p-2 rounded-xl transition-colors ${
-                        u.is_active
-                          ? 'text-orange-500 hover:bg-orange-50'
-                          : 'text-green-500 hover:bg-green-50'
+        <>
+          <motion.div variants={item} className="grid gap-4">
+            <AnimatePresence>
+              {paginatedUsers.map((u, index) => (
+                <motion.div
+                  key={u.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ delay: index * 0.05 }}
+                  className={`bg-white rounded-2xl shadow-sm border p-5 hover:shadow-md transition-all duration-300 ${
+                    !u.is_active ? 'border-red-100 bg-red-50/30' : 'border-slate-100 hover:border-blue-200'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    {/* Avatar */}
+                    <motion.div
+                      className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg ${
+                        u.is_staff
+                          ? 'bg-gradient-to-br from-blue-500 to-violet-600 shadow-blue-500/25'
+                          : 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-cyan-500/25'
                       }`}
-                      whileHover={{ scale: 1.15 }}
-                      whileTap={{ scale: 0.9 }}
-                      title={u.is_active ? 'تعطيل' : 'تفعيل'}
-                      disabled={u.id === currentUser?.id}
+                      whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
                     >
-                      {u.is_active ? <ShieldOff className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
-                    </motion.button>
-                    <motion.button
-                      onClick={() => { setResetModal(u); setNewPassword(''); }}
-                      className="p-2 rounded-xl text-blue-500 hover:bg-blue-50 transition-colors"
-                      whileHover={{ scale: 1.15 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="تغيير كلمة المرور"
-                    >
-                      <Key className="w-5 h-5" />
-                    </motion.button>
-                    <motion.button
-                      onClick={() => handleDelete(u)}
-                      className="p-2 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
-                      whileHover={{ scale: 1.15 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="حذف"
-                      disabled={u.id === currentUser?.id}
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </motion.button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+                      {u.username.charAt(0).toUpperCase()}
+                    </motion.div>
 
-          {users.length === 0 && !loading && (
-            <div className="text-center py-16 text-gray-400">
-              <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-                <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              </motion.div>
-              <p className="text-lg font-medium">لا يوجد مستخدمين</p>
+                    {/* User Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 className="font-bold text-gray-800">{u.username}</h3>
+                        {u.is_staff && (
+                          <motion.span
+                            className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium flex items-center gap-0.5"
+                            initial={{ scale: 0 }} animate={{ scale: 1 }}
+                          >
+                            <Shield className="w-2.5 h-2.5" /> مدير
+                          </motion.span>
+                        )}
+                        {u.is_active ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700 flex items-center gap-0.5">
+                            <CheckCircle className="w-2.5 h-2.5" /> نشط
+                          </span>
+                        ) : (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-700 flex items-center gap-0.5">
+                            <XCircle className="w-2.5 h-2.5" /> معطل
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-400">
+                        {u.email && (
+                          <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{u.email}</span>
+                        )}
+                        {(u.first_name || u.last_name) && (
+                          <span>{u.first_name} {u.last_name}</span>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          انضم {new Date(u.date_joined).toLocaleDateString('ar-SA')}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <FileText className="w-3 h-3" />
+                          {u.document_count} ملف
+                        </span>
+                      </div>
+                      {/* عرض/تغيير الفرع */}
+                      <div className="mt-2 flex items-center gap-2">
+                        <Building2 className="w-3.5 h-3.5 text-blue-500" />
+                        <select
+                          value={u.branch_id || ''}
+                          onChange={e => handleSetBranch(u.id, e.target.value)}
+                          className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                        >
+                          <option value="">بدون فرع</option>
+                          {branches.map(b => (
+                            <option key={b.id} value={b.id}>{b.name}</option>
+                          ))}
+                        </select>
+                        {u.branch_name && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-medium">
+                            {u.branch_name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2 self-end sm:self-center">
+                      <motion.button
+                        onClick={() => handleToggleActive(u.id)}
+                        className={`p-2 rounded-xl transition-colors ${
+                          u.is_active
+                            ? 'text-orange-500 hover:bg-orange-50'
+                            : 'text-green-500 hover:bg-green-50'
+                        }`}
+                        whileHover={{ scale: 1.15 }}
+                        whileTap={{ scale: 0.9 }}
+                        title={u.is_active ? 'تعطيل' : 'تفعيل'}
+                        disabled={u.id === currentUser?.id}
+                      >
+                        {u.is_active ? <ShieldOff className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
+                      </motion.button>
+                      <motion.button
+                        onClick={() => { setResetModal(u); setNewPassword(''); }}
+                        className="p-2 rounded-xl text-blue-500 hover:bg-blue-50 transition-colors"
+                        whileHover={{ scale: 1.15 }}
+                        whileTap={{ scale: 0.9 }}
+                        title="تغيير كلمة المرور"
+                      >
+                        <Key className="w-5 h-5" />
+                      </motion.button>
+                      <motion.button
+                        onClick={() => handleDelete(u)}
+                        className="p-2 rounded-xl text-red-500 hover:bg-red-50 transition-colors"
+                        whileHover={{ scale: 1.15 }}
+                        whileTap={{ scale: 0.9 }}
+                        title="حذف"
+                        disabled={u.id === currentUser?.id}
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {users.length === 0 && !loading && (
+              <div className="text-center py-16 text-gray-400">
+                <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity }}>
+                  <Users className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                </motion.div>
+                <p className="text-lg font-medium">لا يوجد مستخدمين</p>
+              </div>
+            )}
+          </motion.div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <button
+                disabled={currentPage <= 1}
+                onClick={() => setCurrentPage(p => p - 1)}
+                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setCurrentPage(p)}
+                  className={`w-10 h-10 rounded-xl text-sm font-medium transition-all ${
+                    p === currentPage
+                      ? 'bg-gradient-to-l from-blue-500 to-violet-600 text-white shadow-lg shadow-blue-500/25'
+                      : 'hover:bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                disabled={currentPage >= totalPages}
+                onClick={() => setCurrentPage(p => p + 1)}
+                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-30 transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
             </div>
           )}
-        </motion.div>
+        </>
       )}
 
       {/* Reset Password Modal */}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Branch, ArchiveDocument
+from .models import Branch, ArchiveDocument, UserProfile
 
 
 @admin.register(Branch)
@@ -14,3 +14,10 @@ class ArchiveDocumentAdmin(admin.ModelAdmin):
     list_filter = ('branch', 'document_date')
     search_fields = ('employee_name', 'notes')
     date_hierarchy = 'document_date'
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'branch')
+    list_filter = ('branch',)
+    search_fields = ('user__username',)

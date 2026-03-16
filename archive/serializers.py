@@ -1,39 +1,69 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from archive.models import Branch, ArchiveDocument
+from archive.models import Branch, ArchiveDocument, UserProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
+    branch_id = serializers.SerializerMethodField()
+    branch_name = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'date_joined', 'last_login']
+        fields = ['id', 'username', 'email', 'is_staff', 'date_joined', 'last_login',
+                  'branch_id', 'branch_name']
+
+    def get_branch_id(self, obj):
+        profile = getattr(obj, 'profile', None)
+        return profile.branch_id if profile and profile.branch else None
+
+    def get_branch_name(self, obj):
+        profile = getattr(obj, 'profile', None)
+        return profile.branch.name if profile and profile.branch else None
 
 
 class UserManagementSerializer(serializers.ModelSerializer):
     document_count = serializers.SerializerMethodField()
+    branch_id = serializers.SerializerMethodField()
+    branch_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name',
-                  'is_active', 'is_staff', 'date_joined', 'last_login', 'document_count']
+                  'is_active', 'is_staff', 'date_joined', 'last_login',
+                  'document_count', 'branch_id', 'branch_name']
         read_only_fields = ['date_joined', 'last_login', 'document_count']
 
     def get_document_count(self, obj):
         return obj.archivedocument_set.count()
 
+    def get_branch_id(self, obj):
+        profile = getattr(obj, 'profile', None)
+        return profile.branch_id if profile and profile.branch else None
+
+    def get_branch_name(self, obj):
+        profile = getattr(obj, 'profile', None)
+        return profile.branch.name if profile and profile.branch else None
+
 
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
+    branch = serializers.IntegerField(write_only=True, required=False, allow_null=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'password', 'is_staff']
+        fields = ['username', 'email', 'first_name', 'last_name', 'password', 'is_staff', 'branch']
 
     def create(self, validated_data):
+        branch_id = validated_data.pop('branch', None)
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
         user.save()
+        # تحديث الفرع في الملف الشخصي
+        if branch_id:
+            profile = user.profile
+            profile.branch_id = branch_id
+            profile.save()
         return user
 
 

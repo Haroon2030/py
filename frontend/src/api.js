@@ -49,9 +49,11 @@ export const documentAPI = {
 export const userAPI = {
   list: (params) => api.get('/users/', { params }),
   create: (data) => api.post('/users/', data),
+  update: (id, data) => api.patch(`/users/${id}/`, data),
   delete: (id) => api.delete(`/users/${id}/`),
   toggleActive: (id) => api.post(`/users/${id}/toggle_active/`),
   resetPassword: (id, password) => api.post(`/users/${id}/reset_password/`, { password }),
+  setBranch: (id, branchId) => api.post(`/users/${id}/set_branch/`, { branch_id: branchId }),
 };
 
 export default api;

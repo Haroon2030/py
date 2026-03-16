@@ -33,8 +33,13 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // صلاحيات مساعدة
+  const isAdmin = user?.is_staff === true;
+  const userBranchId = user?.branch_id || null;
+  const userBranchName = user?.branch_name || null;
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, isAdmin, userBranchId, userBranchName }}>
       {children}
     </AuthContext.Provider>
   );

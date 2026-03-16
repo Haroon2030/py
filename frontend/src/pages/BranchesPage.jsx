@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { branchAPI } from '../api';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import {
   Building2, Plus, Trash2, FileText, Calendar, Search,
-  Hash, TrendingUp, Sparkles, Edit3, Check, X, ChevronUp, ChevronDown
+  Hash, TrendingUp, Sparkles, Edit3, Check, X, ChevronUp, ChevronDown,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
+
+const PAGE_SIZE = 6;
 
 // Color tokens for consistent theming
 const colors = {
@@ -25,6 +29,7 @@ const rowVariants = {
 };
 
 export default function BranchesPage() {
+  const { isAdmin } = useAuth();
   const [branches, setBranches] = useState([]);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
@@ -34,6 +39,7 @@ export default function BranchesPage() {
   const [sortDir, setSortDir] = useState('asc');
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchBranches = () => {
     branchAPI.list().then(res => {
@@ -104,6 +110,13 @@ export default function BranchesPage() {
     });
 
   const totalDocs = branches.reduce((s, b) => s + (b.document_count || 0), 0);
+
+  // Pagination
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginatedBranches = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  // Reset page on search/sort change
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, sortField, sortDir]);
 
   const SortIcon = ({ field }) => (
     <span className="inline-flex flex-col mr-1">
@@ -280,7 +293,7 @@ export default function BranchesPage() {
                 </thead>
                 <tbody>
                   <AnimatePresence mode="popLayout">
-                    {filtered.map((branch, idx) => (
+                    {paginatedBranches.map((branch, idx) => (
                       <motion.tr
                         key={branch.id}
                         custom={idx}
@@ -293,7 +306,7 @@ export default function BranchesPage() {
                       >
                         <td className="py-4 px-6">
                           <span className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors">
-                            {idx + 1}
+                            {(currentPage - 1) * PAGE_SIZE + idx + 1}
                           </span>
                         </td>
                         <td className="py-4 px-6">
@@ -360,15 +373,17 @@ export default function BranchesPage() {
                             >
                               <Edit3 className="w-4 h-4" />
                             </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => handleDelete(branch.id, branch.name)}
-                              className="p-2 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
-                              title="حذف"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </motion.button>
+                            {isAdmin && (
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => handleDelete(branch.id, branch.name)}
+                                className="p-2 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
+                                title="حذف"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </motion.button>
+                            )}
                           </div>
                         </td>
                       </motion.tr>
@@ -381,7 +396,7 @@ export default function BranchesPage() {
             {/* Mobile Cards */}
             <div className="md:hidden divide-y divide-gray-50">
               <AnimatePresence mode="popLayout">
-                {filtered.map((branch, idx) => (
+                {paginatedBranches.map((branch, idx) => (
                   <motion.div
                     key={branch.id}
                     custom={idx}
@@ -399,7 +414,7 @@ export default function BranchesPage() {
                           <Building2 className="w-6 h-6 text-white" />
                         </div>
                         <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-500">
-                          {idx + 1}
+                          {(currentPage - 1) * PAGE_SIZE + idx + 1}
                         </span>
                       </div>
 
@@ -457,12 +472,14 @@ export default function BranchesPage() {
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(branch.id, branch.name)}
-                          className="p-2 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleDelete(branch.id, branch.name)}
+                            className="p-2 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -487,11 +504,44 @@ export default function BranchesPage() {
           </div>
         )}
 
-        {/* Footer Stats */}
+        {/* Footer Stats + Pagination */}
         {!loading && filtered.length > 0 && (
-          <div className="px-5 py-3 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
-            <span>عرض {filtered.length} من {branches.length} فرع</span>
-            <span>إجمالي الملفات: {totalDocs}</span>
+          <div className="px-5 py-3 bg-gray-50/50 border-t border-gray-100">
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <button
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage(p => p - 1)}
+                  className="p-1.5 rounded-lg hover:bg-gray-200 disabled:opacity-30 transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setCurrentPage(p)}
+                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${
+                      p === currentPage
+                        ? 'bg-gradient-to-l from-blue-500 to-violet-600 text-white shadow-md shadow-blue-500/20'
+                        : 'hover:bg-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(p => p + 1)}
+                  className="p-1.5 rounded-lg hover:bg-gray-200 disabled:opacity-30 transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            <div className="flex items-center justify-between text-xs text-gray-400">
+              <span>عرض {paginatedBranches.length} من {filtered.length} فرع</span>
+              <span>إجمالي الملفات: {totalDocs}</span>
+            </div>
           </div>
         )}
       </motion.div>

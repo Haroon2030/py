@@ -7,18 +7,20 @@ import {
   LogOut, ChevronLeft, Menu, X, Users, Sparkles, Shield
 } from 'lucide-react';
 
-const navItems = [
-  { path: '/', icon: LayoutDashboard, label: 'لوحة التحكم' },
-  { path: '/archive', icon: Archive, label: 'الأرشيف' },
-  { path: '/upload', icon: Upload, label: 'رفع ملف جديد' },
-  { path: '/branches', icon: Building2, label: 'إدارة الفروع' },
-  { path: '/users', icon: Users, label: 'المستخدمين' },
+const allNavItems = [
+  { path: '/', icon: LayoutDashboard, label: 'لوحة التحكم', adminOnly: false },
+  { path: '/archive', icon: Archive, label: 'الأرشيف', adminOnly: false },
+  { path: '/upload', icon: Upload, label: 'رفع ملف جديد', adminOnly: false },
+  { path: '/branches', icon: Building2, label: 'إدارة الفروع', adminOnly: true },
+  { path: '/users', icon: Users, label: 'المستخدمين', adminOnly: true },
 ];
 
 export default function Sidebar() {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navItems = allNavItems.filter(item => !item.adminOnly || isAdmin);
 
   const handleLogout = async () => {
     await logout();
@@ -122,7 +124,7 @@ export default function Sidebar() {
               <p className="text-white text-sm font-semibold truncate">{user?.username}</p>
               <p className="text-slate-500 text-[11px] flex items-center gap-1">
                 <Shield className="w-3 h-3" />
-                مدير النظام
+                {isAdmin ? 'مدير النظام' : 'موظف'}
               </p>
             </div>
           </div>

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Branch(models.Model):
@@ -13,6 +15,36 @@ class Branch(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class UserProfile(models.Model):
+    """ربط المستخدم بالفرع - المدير يرى الكل، الموظف يرى فرعه فقط"""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    branch = models.ForeignKey(
+        Branch, on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name='الفرع', related_name='users'
+    )
+
+    class Meta:
+        verbose_name = 'ملف المستخدم'
+        verbose_name_plural = 'ملفات المستخدمين'
+
+    def __str__(self):
+        branch_name = self.branch.name if self.branch else 'بدون فرع'
+        return f"{self.user.username} — {branch_name}"
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """إنشاء ملف تعريف تلقائي لكل مستخدم جديد"""
+    if created:
+        UserProfile.objects.get_or_create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if not hasattr(instance, 'profile'):
+        UserProfile.objects.get_or_create(user=instance)
 
 
 class ArchiveDocument(models.Model):

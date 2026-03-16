@@ -25,7 +25,7 @@ const floatingIcon = {
 };
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -189,23 +189,25 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        <Link to="/users" className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-violet-200 transition-all duration-300">
-          <div className="flex items-center gap-4">
-            <motion.div
-              className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center group-hover:bg-violet-100 transition-colors"
-              whileHover={{ scale: 1.1, y: -3 }}
-            >
-              <Users className="w-7 h-7 text-violet-600" />
-            </motion.div>
-            <div className="flex-1">
-              <h3 className="font-bold text-gray-800 text-lg">المستخدمين</h3>
-              <p className="text-gray-500 text-sm">إدارة حسابات المستخدمين</p>
+        {isAdmin && (
+          <Link to="/users" className="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg hover:border-violet-200 transition-all duration-300">
+            <div className="flex items-center gap-4">
+              <motion.div
+                className="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center group-hover:bg-violet-100 transition-colors"
+                whileHover={{ scale: 1.1, y: -3 }}
+              >
+                <Users className="w-7 h-7 text-violet-600" />
+              </motion.div>
+              <div className="flex-1">
+                <h3 className="font-bold text-gray-800 text-lg">المستخدمين</h3>
+                <p className="text-gray-500 text-sm">إدارة حسابات المستخدمين</p>
+              </div>
+              <motion.div whileHover={{ x: -5, y: -5 }}>
+                <ArrowUpLeft className="w-5 h-5 text-gray-300 group-hover:text-violet-500 transition-colors" />
+              </motion.div>
             </div>
-            <motion.div whileHover={{ x: -5, y: -5 }}>
-              <ArrowUpLeft className="w-5 h-5 text-gray-300 group-hover:text-violet-500 transition-colors" />
-            </motion.div>
-          </div>
-        </Link>
+          </Link>
+        )}
       </motion.div>
 
       {/* Recent Documents */}
