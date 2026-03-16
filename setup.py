@@ -5,11 +5,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'student_portal.settings')
 django.setup()
 
 from django.contrib.auth.models import User
-from django.core.management import call_command
-
-# Run migrations
-print("Running migrations...")
-call_command('migrate', '--noinput')
 
 # Create superuser
 if not User.objects.filter(username='admin').exists():

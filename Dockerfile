@@ -41,11 +41,12 @@ RUN mkdir -p /app/media
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Run migrations and create superuser during build
-RUN python setup.py
+# Copy entrypoint script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 # Expose port
 EXPOSE 8000
 
-# Start gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "student_portal.wsgi:application"]
+# Run migrations + create superuser at startup, then start gunicorn
+ENTRYPOINT ["/app/entrypoint.sh"]
