@@ -6,6 +6,9 @@ db.sqlite3
 staticfiles/
 *.mo
 *.egg-info/
-dist/
 build/
 .vscode/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/

@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+@import "tailwindcss";
+
+@layer base {
+  * {
+    font-family: 'Tajawal', sans-serif;
+  }
+  body {
+    @apply bg-gray-50 text-gray-800;
+    direction: rtl;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-lg border border-white/20 rounded-2xl shadow-lg;
+  }
+  .gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  .gradient-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  }
+  .gradient-danger {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+  .gradient-warning {
+    background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  }
+}
