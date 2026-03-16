@@ -9,8 +9,8 @@ from django.utils import timezone
 from .models import Branch, ArchiveDocument, UserProfile
 from .serializers import (
     BranchSerializer, ArchiveDocumentSerializer,
-    ArchiveDocumentUploadSerializer, UserSerializer,
-    UserManagementSerializer, UserCreateSerializer
+    ArchiveDocumentUploadSerializer, ArchiveDocumentUpdateSerializer,
+    UserSerializer, UserManagementSerializer, UserCreateSerializer
 )
 
 
@@ -97,6 +97,8 @@ class ArchiveDocumentViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'create':
             return ArchiveDocumentUploadSerializer
+        if self.action in ('update', 'partial_update'):
+            return ArchiveDocumentUpdateSerializer
         return ArchiveDocumentSerializer
 
     def get_queryset(self):

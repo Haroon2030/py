@@ -7,7 +7,7 @@ import {
   Users, UserPlus, Search, Shield, ShieldOff,
   Key, Trash2, Mail, Calendar, FileText,
   Eye, EyeOff, CheckCircle, XCircle, Sparkles,
-  Building2, ChevronLeft, ChevronRight
+  Building2, ChevronLeft, ChevronRight, Edit3
 } from 'lucide-react';
 
 const PAGE_SIZE = 6;
@@ -32,6 +32,11 @@ export default function UsersPage() {
   const [newPassword, setNewPassword] = useState('');
   const [showNewPass, setShowNewPass] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [editModal, setEditModal] = useState(null);
+  const [editForm, setEditForm] = useState({
+    username: '', email: '', first_name: '', last_name: '', is_staff: false,
+  });
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   // New user form
   const [form, setForm] = useState({
@@ -137,6 +142,37 @@ export default function UsersPage() {
       fetchUsers();
     } catch (err) {
       toast.error(err.response?.data?.error || 'حدث خطأ');
+    }
+  };
+
+  const openEditModal = (u) => {
+    setEditForm({
+      username: u.username || '',
+      email: u.email || '',
+      first_name: u.first_name || '',
+      last_name: u.last_name || '',
+      is_staff: u.is_staff || false,
+    });
+    setEditModal(u);
+  };
+
+  const handleEditUser = async () => {
+    if (!editForm.username) {
+      toast.error('اسم المستخدم مطلوب');
+      return;
+    }
+    setEditSubmitting(true);
+    try {
+      await userAPI.update(editModal.id, editForm);
+      toast.success('تم تحديث بيانات المستخدم بنجاح');
+      setEditModal(null);
+      fetchUsers();
+    } catch (err) {
+      const msg = err.response?.data;
+      if (msg?.username) toast.error(msg.username[0]);
+      else toast.error('حدث خطأ أثناء التحديث');
+    } finally {
+      setEditSubmitting(false);
     }
   };
 
@@ -416,6 +452,15 @@ export default function UsersPage() {
                     {/* Actions */}
                     <div className="flex items-center gap-2 self-end sm:self-center">
                       <motion.button
+                        onClick={() => openEditModal(u)}
+                        className="p-2 rounded-xl text-violet-500 hover:bg-violet-50 transition-colors"
+                        whileHover={{ scale: 1.15 }}
+                        whileTap={{ scale: 0.9 }}
+                        title="تعديل البيانات"
+                      >
+                        <Edit3 className="w-5 h-5" />
+                      </motion.button>
+                      <motion.button
                         onClick={() => handleToggleActive(u.id)}
                         className={`p-2 rounded-xl transition-colors ${
                           u.is_active
@@ -498,6 +543,118 @@ export default function UsersPage() {
           )}
         </>
       )}
+
+      {/* Edit User Modal */}
+      <AnimatePresence>
+        {editModal && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setEditModal(null)} />
+            <motion.div
+              className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg"
+              initial={{ scale: 0.8, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.8, y: 20 }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <motion.div
+                  className="w-11 h-11 rounded-xl bg-violet-100 flex items-center justify-center"
+                  animate={{ rotate: [0, -10, 10, 0] }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Edit3 className="w-5 h-5 text-violet-600" />
+                </motion.div>
+                <div>
+                  <h3 className="font-bold text-gray-800">تعديل بيانات المستخدم</h3>
+                  <p className="text-sm text-gray-500">{editModal.username}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                <div>
+                  <label className="fi-label">اسم المستخدم *</label>
+                  <input
+                    type="text"
+                    value={editForm.username}
+                    onChange={e => setEditForm({ ...editForm, username: e.target.value })}
+                    className="fi-input"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="fi-label">البريد الإلكتروني</label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                    className="fi-input"
+                  />
+                </div>
+                <div>
+                  <label className="fi-label">الاسم الأول</label>
+                  <input
+                    type="text"
+                    value={editForm.first_name}
+                    onChange={e => setEditForm({ ...editForm, first_name: e.target.value })}
+                    className="fi-input"
+                  />
+                </div>
+                <div>
+                  <label className="fi-label">الاسم الأخير</label>
+                  <input
+                    type="text"
+                    value={editForm.last_name}
+                    onChange={e => setEditForm({ ...editForm, last_name: e.target.value })}
+                    className="fi-input"
+                  />
+                </div>
+                <div className="sm:col-span-2 flex items-center gap-3">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editForm.is_staff}
+                      onChange={e => setEditForm({ ...editForm, is_staff: e.target.checked })}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-blue-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:-right-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:-translate-x-full peer-checked:after:-translate-x-0" />
+                  </label>
+                  <span className="text-sm text-gray-600 flex items-center gap-1">
+                    <Shield className="w-4 h-4 text-blue-500" />
+                    صلاحيات المدير
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <motion.button
+                  onClick={handleEditUser}
+                  disabled={editSubmitting}
+                  className="flex-1 bg-gradient-to-l from-blue-500 to-violet-600 text-white py-2.5 rounded-xl font-medium shadow-lg shadow-blue-500/20 disabled:opacity-50"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {editSubmitting ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <motion.div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} />
+                      جاري الحفظ...
+                    </span>
+                  ) : 'حفظ التعديلات'}
+                </motion.button>
+                <button
+                  onClick={() => setEditModal(null)}
+                  className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Reset Password Modal */}
       <AnimatePresence>

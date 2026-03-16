@@ -93,6 +93,13 @@ class ArchiveDocumentSerializer(serializers.ModelSerializer):
         read_only_fields = ['uploaded_by', 'created_at', 'updated_at']
 
 
+class ArchiveDocumentUpdateSerializer(serializers.ModelSerializer):
+    """سيريالايزر لتعديل بيانات المستند بدون تغيير ملف PDF"""
+    class Meta:
+        model = ArchiveDocument
+        fields = ['employee_name', 'branch', 'document_date', 'notes']
+
+
 class ArchiveDocumentUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArchiveDocument

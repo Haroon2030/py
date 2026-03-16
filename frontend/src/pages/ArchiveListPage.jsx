@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { documentAPI, branchAPI } from '../api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import {
   Search, Filter, FileText, Eye, Trash2,
   Plus, Calendar, Building2, ChevronLeft,
-  ChevronRight, User, Edit3
+  ChevronRight, User, Edit3, X
 } from 'lucide-react';
 
 const PAGE_SIZE = 6;
@@ -19,6 +19,9 @@ export default function ArchiveListPage() {
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [editModal, setEditModal] = useState(null);
+  const [editForm, setEditForm] = useState({ employee_name: '', branch: '', document_date: '', notes: '' });
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const page = parseInt(searchParams.get('page') || '1');
   const search = searchParams.get('search') || '';
@@ -27,13 +30,11 @@ export default function ArchiveListPage() {
   const dateTo = searchParams.get('date_to') || '';
 
   useEffect(() => {
-    if (isAdmin) {
-      branchAPI.list().then(res => {
-        const data = res.data;
-        setBranches(Array.isArray(data) ? data : data.results || []);
-      });
-    }
-  }, [isAdmin]);
+    branchAPI.list().then(res => {
+      const data = res.data;
+      setBranches(Array.isArray(data) ? data : data.results || []);
+    });
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -66,6 +67,45 @@ export default function ArchiveListPage() {
       setDocuments(docs => docs.filter(d => d.id !== id));
     } catch (err) {
       toast.error(err.response?.data?.detail || 'حدث خطأ أثناء الحذف');
+    }
+  };
+
+  const openEditDoc = (doc) => {
+    setEditForm({
+      employee_name: doc.employee_name || '',
+      branch: doc.branch || '',
+      document_date: doc.document_date || '',
+      notes: doc.notes || '',
+    });
+    setEditModal(doc);
+  };
+
+  const handleEditDoc = async () => {
+    if (!editForm.employee_name || !editForm.branch || !editForm.document_date) {
+      toast.error('اسم الموظف والفرع والتاريخ مطلوبة');
+      return;
+    }
+    setEditSubmitting(true);
+    try {
+      await documentAPI.update(editModal.id, editForm);
+      toast.success('تم تحديث بيانات المستند بنجاح');
+      setEditModal(null);
+      // Refresh the list
+      setLoading(true);
+      const params = { page, format: 'json' };
+      if (search) params.search = search;
+      if (branch) params.branch = branch;
+      if (dateFrom) params.date_from = dateFrom;
+      if (dateTo) params.date_to = dateTo;
+      documentAPI.list(params).then(res => {
+        setDocuments(res.data.results || []);
+        setTotalPages(Math.ceil((res.data.count || 0) / PAGE_SIZE));
+        setLoading(false);
+      });
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'حدث خطأ أثناء التحديث');
+    } finally {
+      setEditSubmitting(false);
     }
   };
 
@@ -196,6 +236,13 @@ export default function ArchiveListPage() {
                           >
                             <Eye className="w-4 h-4" />
                           </Link>
+                          <button
+                            onClick={() => openEditDoc(doc)}
+                            className="p-2 rounded-lg text-violet-500 hover:bg-violet-50 transition-colors"
+                            title="تعديل"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
                           <a
                             href={doc.pdf_file}
                             target="_blank"
@@ -283,6 +330,94 @@ export default function ArchiveListPage() {
           </div>
         )}
       </div>
+
+      {/* Edit Document Modal */}
+      <AnimatePresence>
+        {editModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setEditModal(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6"
+              dir="rtl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-gray-800">تعديل بيانات المستند</h3>
+                <button onClick={() => setEditModal(null)} className="p-1 rounded-lg hover:bg-gray-100">
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">اسم الموظف</label>
+                  <input
+                    type="text"
+                    value={editForm.employee_name}
+                    onChange={(e) => setEditForm({ ...editForm, employee_name: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">الفرع</label>
+                  <select
+                    value={editForm.branch}
+                    onChange={(e) => setEditForm({ ...editForm, branch: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 outline-none transition-all"
+                  >
+                    <option value="">اختر الفرع</option>
+                    {branches.map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">تاريخ المستند</label>
+                  <input
+                    type="date"
+                    value={editForm.document_date}
+                    onChange={(e) => setEditForm({ ...editForm, document_date: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">ملاحظات</label>
+                  <textarea
+                    value={editForm.notes}
+                    onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                    rows={3}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-violet-400 focus:ring-2 focus:ring-violet-100 outline-none transition-all resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={handleEditDoc}
+                  disabled={editSubmitting}
+                  className="flex-1 bg-gradient-to-l from-blue-500 to-violet-600 text-white py-2.5 rounded-xl font-medium hover:shadow-lg hover:shadow-violet-500/25 transition-all disabled:opacity-50"
+                >
+                  {editSubmitting ? 'جاري الحفظ...' : 'حفظ التعديلات'}
+                </button>
+                <button
+                  onClick={() => setEditModal(null)}
+                  className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
