@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block title %}الأرشيف - نظام الأرشيف{% endblock %}
+
+{% block body %}
+<!-- Sidebar -->
+<nav class="sidebar">
+    <div class="p-3 text-center border-bottom border-secondary">
+        <h5 class="text-white mb-0"><i class="bi bi-archive-fill me-2"></i>نظام الأرشيف</h5>
+        <small class="text-white-50">إدارة ملفات المطابقة</small>
+    </div>
+    <ul class="nav flex-column mt-3">
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'archive_list' %}">
+                <i class="bi bi-house-door-fill"></i> الرئيسية
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'archive_upload' %}">
+                <i class="bi bi-cloud-upload-fill"></i> رفع ملف جديد
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'branch_manage' %}">
+                <i class="bi bi-building"></i> إدارة الفروع
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'welcome' %}">
+                <i class="bi bi-speedometer2"></i> لوحة التحكم
+            </a>
+        </li>
+    </ul>
+    <div class="position-absolute bottom-0 w-100 p-3 border-top border-secondary">
+        <div class="d-flex align-items-center text-white-50 mb-2 px-2">
+            <i class="bi bi-person-circle me-2"></i>
+            <small>{{ request.user.username }}</small>
+        </div>
+        <a href="{% url 'logout' %}" class="nav-link text-danger">
+            <i class="bi bi-box-arrow-right"></i> تسجيل الخروج
+        </a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content animate-fade-in">
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h3 class="mb-1"><i class="bi bi-archive me-2"></i>أرشيف ملفات المطابقة</h3>
+            <p class="mb-0 opacity-75">إدارة وحفظ ملفات المطابقة اليومية</p>
+        </div>
+        <a href="{% url 'archive_upload' %}" class="btn btn-light btn-lg">
+            <i class="bi bi-plus-circle me-1"></i> رفع ملف جديد
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="opacity-75 mb-1">إجمالي الملفات</h6>
+                        <h2 class="mb-0">{{ total_count }}</h2>
+                    </div>
+                    <i class="bi bi-file-earmark-pdf" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="opacity-75 mb-1">ملفات اليوم</h6>
+                        <h2 class="mb-0">{{ today_count }}</h2>
+                    </div>
+                    <i class="bi bi-calendar-check" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="opacity-75 mb-1">عدد الفروع</h6>
+                        <h2 class="mb-0">{{ branches.count }}</h2>
+                    </div>
+                    <i class="bi bi-building" style="font-size: 2.5rem; opacity: 0.5;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold"><i class="bi bi-search me-1"></i>بحث</label>
+                    <input type="text" name="search" class="form-control" placeholder="اسم الموظف، ملاحظات..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold"><i class="bi bi-building me-1"></i>الفرع</label>
+                    <select name="branch" class="form-select">
+                        <option value="">جميع الفروع</option>
+                        {% for branch in branches %}
+                        <option value="{{ branch.id }}" {% if request.GET.branch == branch.id|stringformat:"d" %}selected{% endif %}>{{ branch.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold"><i class="bi bi-calendar me-1"></i>من تاريخ</label>
+                    <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold"><i class="bi bi-calendar me-1"></i>إلى تاريخ</label>
+                    <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel me-1"></i> تصفية
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'danger' %}exclamation-triangle{% else %}info-circle{% endif %} me-1"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Documents Table -->
+    <div class="card">
+        <div class="card-body p-0">
+            {% if documents %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th class="py-3 px-4">#</th>
+                            <th class="py-3">اسم الموظف</th>
+                            <th class="py-3">الفرع</th>
+                            <th class="py-3">تاريخ المستند</th>
+                            <th class="py-3">الملف</th>
+                            <th class="py-3">رفع بواسطة</th>
+                            <th class="py-3">تاريخ الرفع</th>
+                            <th class="py-3 text-center">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doc in documents %}
+                        <tr>
+                            <td class="px-4">{{ forloop.counter }}</td>
+                            <td>
+                                <span class="fw-bold">{{ doc.employee_name }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-branch">{{ doc.branch.name }}</span>
+                            </td>
+                            <td>{{ doc.document_date|date:"Y/m/d" }}</td>
+                            <td>
+                                <a href="{{ doc.pdf_file.url }}" target="_blank" class="text-decoration-none">
+                                    <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i>
+                                    عرض PDF
+                                </a>
+                            </td>
+                            <td>
+                                <i class="bi bi-person me-1 text-muted"></i>{{ doc.uploaded_by.username }}
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ doc.created_at|date:"Y/m/d H:i" }}</small>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'archive_detail' doc.pk %}" class="btn btn-outline-primary" title="تفاصيل">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'archive_delete' doc.pk %}" class="btn btn-outline-danger" title="حذف">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                <h5 class="text-muted mt-3">لا توجد ملفات</h5>
+                <p class="text-muted">ابدأ بـ<a href="{% url 'archive_upload' %}">رفع ملف جديد</a></p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if documents.has_other_pages %}
+    <nav class="mt-4 d-flex justify-content-center">
+        <ul class="pagination">
+            {% if documents.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ documents.previous_page_number }}&{{ request.GET.urlencode }}">&raquo;</a>
+            </li>
+            {% endif %}
+            {% for num in documents.paginator.page_range %}
+            <li class="page-item {% if documents.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}&{{ request.GET.urlencode }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+            {% if documents.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ documents.next_page_number }}&{{ request.GET.urlencode }}">&laquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

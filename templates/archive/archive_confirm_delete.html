@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}حذف المستند - نظام الأرشيف{% endblock %}
+
+{% block body %}
+<!-- Sidebar -->
+<nav class="sidebar">
+    <div class="p-3 text-center border-bottom border-secondary">
+        <h5 class="text-white mb-0"><i class="bi bi-archive-fill me-2"></i>نظام الأرشيف</h5>
+        <small class="text-white-50">إدارة ملفات المطابقة</small>
+    </div>
+    <ul class="nav flex-column mt-3">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'archive_list' %}">
+                <i class="bi bi-house-door-fill"></i> الرئيسية
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'archive_upload' %}">
+                <i class="bi bi-cloud-upload-fill"></i> رفع ملف جديد
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'branch_manage' %}">
+                <i class="bi bi-building"></i> إدارة الفروع
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content animate-fade-in">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="mb-3">تأكيد الحذف</h4>
+                    <p class="text-muted mb-4">
+                        هل أنت متأكد من حذف مستند <strong>{{ document.employee_name }}</strong>
+                        بتاريخ <strong>{{ document.document_date|date:"Y/m/d" }}</strong>؟
+                        <br>
+                        <small class="text-danger">هذا الإجراء لا يمكن التراجع عنه!</small>
+                    </p>
+
+                    <div class="p-3 bg-light rounded-3 mb-4 text-start">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">الموظف:</span>
+                            <span class="fw-bold">{{ document.employee_name }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">الفرع:</span>
+                            <span>{{ document.branch.name }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">التاريخ:</span>
+                            <span>{{ document.document_date|date:"Y/m/d" }}</span>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="bi bi-trash me-2"></i>نعم، احذف المستند
+                            </button>
+                            <a href="{% url 'archive_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-right me-1"></i>إلغاء والعودة
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

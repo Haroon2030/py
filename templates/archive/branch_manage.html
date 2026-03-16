@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}إدارة الفروع - نظام الأرشيف{% endblock %}
+
+{% block body %}
+<!-- Sidebar -->
+<nav class="sidebar">
+    <div class="p-3 text-center border-bottom border-secondary">
+        <h5 class="text-white mb-0"><i class="bi bi-archive-fill me-2"></i>نظام الأرشيف</h5>
+        <small class="text-white-50">إدارة ملفات المطابقة</small>
+    </div>
+    <ul class="nav flex-column mt-3">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'archive_list' %}">
+                <i class="bi bi-house-door-fill"></i> الرئيسية
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'archive_upload' %}">
+                <i class="bi bi-cloud-upload-fill"></i> رفع ملف جديد
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'branch_manage' %}">
+                <i class="bi bi-building"></i> إدارة الفروع
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'welcome' %}">
+                <i class="bi bi-speedometer2"></i> لوحة التحكم
+            </a>
+        </li>
+    </ul>
+    <div class="position-absolute bottom-0 w-100 p-3 border-top border-secondary">
+        <div class="d-flex align-items-center text-white-50 mb-2 px-2">
+            <i class="bi bi-person-circle me-2"></i>
+            <small>{{ request.user.username }}</small>
+        </div>
+        <a href="{% url 'logout' %}" class="nav-link text-danger">
+            <i class="bi bi-box-arrow-right"></i> تسجيل الخروج
+        </a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content animate-fade-in">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h3 class="mb-1"><i class="bi bi-building me-2"></i>إدارة الفروع</h3>
+        <p class="mb-0 opacity-75">إضافة وإدارة فروع الشركة</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'danger' %}exclamation-triangle{% else %}info-circle{% endif %} me-1"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Add Branch Form -->
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0"><i class="bi bi-plus-circle me-2 text-primary"></i>إضافة فرع جديد</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">اسم الفرع</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle me-1"></i> إضافة الفرع
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Branches List -->
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="bi bi-list-ul me-2 text-primary"></i>قائمة الفروع</h6>
+                    <span class="badge bg-primary rounded-pill">{{ branches.count }} فرع</span>
+                </div>
+                <div class="card-body p-0">
+                    {% if branches %}
+                    <div class="list-group list-group-flush">
+                        {% for branch in branches %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-4">
+                            <div>
+                                <i class="bi bi-building me-2 text-primary"></i>
+                                <span class="fw-bold">{{ branch.name }}</span>
+                                <br>
+                                <small class="text-muted me-3">
+                                    <i class="bi bi-calendar me-1"></i>{{ branch.created_at|date:"Y/m/d" }}
+                                </small>
+                                <small class="text-muted">
+                                    <i class="bi bi-file-earmark me-1"></i>{{ branch.documents.count }} ملف
+                                </small>
+                            </div>
+                            <a href="{% url 'branch_delete' branch.pk %}" class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('هل أنت متأكد من حذف هذا الفرع؟');">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-building" style="font-size: 3rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2">لا توجد فروع بعد</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
