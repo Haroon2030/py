@@ -12,9 +12,6 @@ from django.views.static import serve
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('archive.api_urls')),
-    # Legacy Django views (keep for backwards compat)
-    path('archive/', include('archive.urls')),
-    path('accounts/', include('accounts.urls')),
 ]
 
 # Media files
@@ -26,7 +23,7 @@ if not settings.DEBUG:
 
 # React SPA - catch all routes and serve index.html
 urlpatterns += [
-    re_path(r'^(?!admin|api|media|static|archive|accounts).*$',
+    re_path(r'^(?!admin|api|media|static).*$',
             TemplateView.as_view(template_name='index.html'),
             name='react_app'),
 ]
