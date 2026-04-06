@@ -46,7 +46,7 @@ COPY entrypoint.sh /app/entrypoint.sh
 RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8095
 
 # Run migrations + create superuser at startup, then start gunicorn
 ENTRYPOINT ["/app/entrypoint.sh"]
