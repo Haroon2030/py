@@ -1,5 +1,5 @@
 """
-URL configuration for student_portal project.
+URL configuration for archive_project project.
 """
 from django.contrib import admin
 from django.urls import path, include, re_path

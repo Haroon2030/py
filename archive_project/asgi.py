@@ -1,5 +1,5 @@
 """
-ASGI config for student_portal project.
+ASGI config for archive_project project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'student_portal.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'archive_project.settings')
 
 application = get_asgi_application()

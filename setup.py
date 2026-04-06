@@ -1,7 +1,7 @@
 import os
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'student_portal.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'archive_project.settings')
 django.setup()
 
 from django.contrib.auth.models import User
